@@ -1,0 +1,11 @@
+Django>=5.0
+psycopg2-binary
+djangorestframework
+django-cors-headers
+django-allauth
+dj-rest-auth[with_social]
+djangorestframework-simplejwt
+python-dotenv
+Pillow
+whitenoise
+gunicorn
