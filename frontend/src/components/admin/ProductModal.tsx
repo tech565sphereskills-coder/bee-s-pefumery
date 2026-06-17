@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, Upload, Save, AlertCircle } from "lucide-react";
+import { X, Upload, Save, AlertCircle, Plus, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { useAuth } from "@/store/auth";
@@ -16,6 +16,16 @@ interface ProductImage {
   alt_text?: string;
 }
 
+interface Variant {
+  id?: number;
+  size_ml: number | string;
+  price: string;
+  stock: number | string;
+  sku: string;
+  is_active: boolean;
+  sort_order: number | string;
+}
+
 interface Product {
   id: number;
   name: string;
@@ -29,6 +39,7 @@ interface Product {
   is_active: boolean;
   category: number;
   best_seller?: boolean;
+  variants?: Variant[];
   notes?: {
     top: string[];
     heart: string[];
@@ -69,6 +80,7 @@ export function ProductModal({ isOpen, onClose, product, onSuccess }: ProductMod
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [gallery, setGallery] = useState<{ id?: number; file?: File; preview: string; isExisting?: boolean }[]>([]);
   const [deletedGalleryIds, setDeletedGalleryIds] = useState<number[]>([]);
+  const [variants, setVariants] = useState<Variant[]>([]);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -110,6 +122,17 @@ export function ProductModal({ isOpen, onClose, product, onSuccess }: ProductMod
       } else {
         setGallery([]);
       }
+      setVariants(
+        product.variants?.map((v) => ({
+          id: v.id,
+          size_ml: v.size_ml,
+          price: v.price,
+          stock: v.stock,
+          sku: v.sku || "",
+          is_active: v.is_active ?? true,
+          sort_order: v.sort_order || 0,
+        })) || []
+      );
       setDeletedGalleryIds([]);
     } else {
       setFormData({
@@ -127,10 +150,31 @@ export function ProductModal({ isOpen, onClose, product, onSuccess }: ProductMod
       });
       setImagePreview(null);
       setGallery([]);
+      setVariants([]);
       setDeletedGalleryIds([]);
     }
     setImageFile(null);
   }, [product, isOpen]);
+
+  const addVariant = () => {
+    const nextSort = variants.length > 0 ? Math.max(...variants.map(v => Number(v.sort_order))) + 1 : 1;
+    setVariants([...variants, {
+      size_ml: 50,
+      price: formData.price || "0",
+      stock: formData.stock || "0",
+      sku: "",
+      is_active: true,
+      sort_order: nextSort,
+    }]);
+  };
+
+  const updateVariant = (index: number, field: keyof Variant, value: any) => {
+    setVariants(variants.map((v, i) => i === index ? { ...v, [field]: value } : v));
+  };
+
+  const removeVariant = (index: number) => {
+    setVariants(variants.filter((_, i) => i !== index));
+  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -209,6 +253,19 @@ export function ProductModal({ isOpen, onClose, product, onSuccess }: ProductMod
       // Append deleted gallery image IDs
       if (deletedGalleryIds.length > 0) {
         data.append("deleted_gallery_images", JSON.stringify(deletedGalleryIds));
+      }
+
+      // Append variants
+      if (variants.length > 0) {
+        data.append("variants", JSON.stringify(variants.map((v) => ({
+          id: v.id,
+          size_ml: Number(v.size_ml),
+          price: v.price,
+          stock: Number(v.stock),
+          sku: v.sku,
+          is_active: v.is_active,
+          sort_order: Number(v.sort_order),
+        }))));
       }
 
       await api({
@@ -463,7 +520,7 @@ export function ProductModal({ isOpen, onClose, product, onSuccess }: ProductMod
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-wider text-gray-400">
-                  Stock
+                  Base Stock
                 </label>
                 <input
                   required
@@ -473,6 +530,77 @@ export function ProductModal({ isOpen, onClose, product, onSuccess }: ProductMod
                   className="w-full bg-gray-50 border-none rounded-xl py-3 px-4 text-sm focus:ring-2 focus:ring-gold/20"
                 />
               </div>
+            </div>
+
+            {/* Variants Section */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">
+                  Size Variants (e.g. 30ml, 50ml, 100ml)
+                </label>
+                <button
+                  type="button"
+                  onClick={addVariant}
+                  className="flex items-center gap-1 text-xs font-bold text-gold hover:text-gold/70 transition-colors"
+                >
+                  <Plus className="h-3 w-3" /> Add Size
+                </button>
+              </div>
+              {variants.length === 0 ? (
+                <p className="text-xs text-gray-400 italic ml-1">
+                  No variants defined. Product will use the base price and stock above.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {variants.map((v, idx) => (
+                    <div key={idx} className="flex items-end gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
+                      <div className="w-20 space-y-1">
+                        <label className="text-[9px] uppercase tracking-wider text-gray-400">Size (ml)</label>
+                        <input
+                          type="number"
+                          value={v.size_ml}
+                          onChange={(e) => updateVariant(idx, "size_ml", e.target.value)}
+                          className="w-full bg-white border border-gray-200 rounded-lg py-2 px-2 text-xs focus:ring-2 focus:ring-gold/20"
+                        />
+                      </div>
+                      <div className="w-24 space-y-1">
+                        <label className="text-[9px] uppercase tracking-wider text-gray-400">Price (₦)</label>
+                        <input
+                          type="number"
+                          value={v.price}
+                          onChange={(e) => updateVariant(idx, "price", e.target.value)}
+                          className="w-full bg-white border border-gray-200 rounded-lg py-2 px-2 text-xs focus:ring-2 focus:ring-gold/20"
+                        />
+                      </div>
+                      <div className="w-20 space-y-1">
+                        <label className="text-[9px] uppercase tracking-wider text-gray-400">Stock</label>
+                        <input
+                          type="number"
+                          value={v.stock}
+                          onChange={(e) => updateVariant(idx, "stock", e.target.value)}
+                          className="w-full bg-white border border-gray-200 rounded-lg py-2 px-2 text-xs focus:ring-2 focus:ring-gold/20"
+                        />
+                      </div>
+                      <div className="flex-1 space-y-1">
+                        <label className="text-[9px] uppercase tracking-wider text-gray-400">SKU</label>
+                        <input
+                          value={v.sku}
+                          onChange={(e) => updateVariant(idx, "sku", e.target.value)}
+                          className="w-full bg-white border border-gray-200 rounded-lg py-2 px-2 text-xs focus:ring-2 focus:ring-gold/20"
+                          placeholder="e.g. midnight-oud-50ml"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeVariant(idx)}
+                        className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

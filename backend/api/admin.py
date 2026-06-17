@@ -1,5 +1,10 @@
 from django.contrib import admin
-from .models import Category, Product, Order, OrderItem, StoreSetting
+from .models import Category, Product, Variant, Order, OrderItem, StoreSetting
+
+class VariantInline(admin.TabularInline):
+    model = Variant
+    extra = 1
+    fields = ['size_ml', 'price', 'stock', 'sku', 'is_active', 'sort_order']
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
@@ -12,6 +17,7 @@ class ProductAdmin(admin.ModelAdmin):
     list_filter = ('brand', 'is_active', 'best_seller', 'category')
     search_fields = ('name', 'brand')
     prepopulated_fields = {'slug': ('name',)}
+    inlines = [VariantInline]
 
 class OrderItemInline(admin.TabularInline):
     model = OrderItem

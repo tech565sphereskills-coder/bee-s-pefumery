@@ -75,6 +75,11 @@ function Cart() {
                       >
                         {item.name}
                       </Link>
+                      {item.variant && (
+                        <p className="mt-1 text-xs text-muted-foreground uppercase tracking-wider">
+                          {item.variant.label}
+                        </p>
+                      )}
                       <p className="mt-2 text-sm text-muted-foreground">{naira(item.price)}</p>
                     </div>
                     <button

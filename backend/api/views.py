@@ -16,10 +16,11 @@ import json
 import os
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
-from .models import Category, Product, Order, OrderItem, StoreSetting, Review, Coupon, NewsletterSubscriber, ContactMessage
+from .models import Category, Product, Variant, Order, OrderItem, StoreSetting, Review, Coupon, NewsletterSubscriber, ContactMessage
 from .serializers import (
     CategorySerializer, 
     ProductSerializer, 
+    VariantSerializer,
     OrderSerializer, 
     OrderItemSerializer, 
     StoreSettingSerializer,
@@ -36,7 +37,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
     pagination_class = None
 
 class ProductViewSet(viewsets.ModelViewSet):
-    queryset = Product.objects.all().prefetch_related('gallery', 'reviews')
+    queryset = Product.objects.all().prefetch_related('gallery', 'reviews', 'variants')
     serializer_class = ProductSerializer
     lookup_field = 'slug'
 
@@ -56,7 +57,7 @@ class ProductViewSet(viewsets.ModelViewSet):
                 raise Http404
 
     def get_queryset(self):
-        queryset = Product.objects.all().prefetch_related('gallery', 'reviews')
+        queryset = Product.objects.all().prefetch_related('gallery', 'reviews', 'variants')
         category = self.request.query_params.get('category')
         search = self.request.query_params.get('search')
         min_price = self.request.query_params.get('min_price')
@@ -83,6 +84,44 @@ class ProductViewSet(viewsets.ModelViewSet):
         
         return queryset
 
+    def handle_variants(self, product):
+        variants_data = self.request.data.get('variants')
+        if variants_data:
+            import json
+            try:
+                if isinstance(variants_data, str):
+                    variants_data = json.loads(variants_data)
+            except Exception:
+                return
+
+            if isinstance(variants_data, list):
+                incoming_ids = []
+                for v_data in variants_data:
+                    v_id = v_data.get('id')
+                    if v_id:
+                        try:
+                            variant = Variant.objects.get(id=v_id, product=product)
+                            for field in ['size_ml', 'price', 'stock', 'sku', 'is_active', 'sort_order']:
+                                if field in v_data:
+                                    setattr(variant, field, v_data[field])
+                            variant.save()
+                            incoming_ids.append(v_id)
+                        except Variant.DoesNotExist:
+                            pass
+                    else:
+                        variant = Variant.objects.create(
+                            product=product,
+                            size_ml=v_data.get('size_ml', 50),
+                            price=v_data.get('price', product.price),
+                            stock=v_data.get('stock', 0),
+                            sku=v_data.get('sku', ''),
+                            is_active=v_data.get('is_active', True),
+                            sort_order=v_data.get('sort_order', 0),
+                        )
+                        incoming_ids.append(variant.id)
+                # Remove variants not in incoming list
+                product.variants.exclude(id__in=incoming_ids).delete()
+
     def perform_create(self, serializer):
         from .models import ProductImage
         product = serializer.save()
@@ -91,6 +130,8 @@ class ProductViewSet(viewsets.ModelViewSet):
         gallery_images = self.request.FILES.getlist('gallery_images')
         for img in gallery_images:
             ProductImage.objects.create(product=product, image=img)
+        
+        self.handle_variants(product)
 
     def perform_update(self, serializer):
         from .models import ProductImage
@@ -114,6 +155,8 @@ class ProductViewSet(viewsets.ModelViewSet):
             
             if isinstance(deleted_ids, list):
                 ProductImage.objects.filter(product=product, id__in=deleted_ids).delete()
+        
+        self.handle_variants(product)
 
     def get_permissions(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy']:

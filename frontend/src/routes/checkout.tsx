@@ -147,9 +147,11 @@ function Checkout() {
       payment_verified: !!paymentRef,
       payment_reference: paymentRef || "",
       items: items.map((i) => ({
-        product: i.id,
+        product: i.id.split('_v')[0],
         quantity: i.qty,
         price: i.price,
+        variant_id: i.variant?.id || null,
+        variant_label: i.variant?.label || "",
       })),
     };
 
@@ -523,20 +525,27 @@ function Checkout() {
             <div className="border border-border bg-secondary/30 p-8">
               <p className="eyebrow text-gold">Order Summary</p>
               <ul className="mt-6 space-y-5">
-                {items.map((item) => (
-                  <li key={item.id} className="flex gap-4">
-                    <div className="relative h-16 w-16 shrink-0">
-                      <ProductImage src={item.image} alt={item.name} aspect="aspect-square" />
-                      <span className="absolute -right-2 -top-2 z-10 grid h-5 w-5 place-items-center rounded-full bg-noir text-[10px] text-nude">
-                        {item.qty}
-                      </span>
-                    </div>
-                    <div className="flex flex-1 items-start justify-between gap-2 text-sm">
-                      <span className="font-serif">{item.name}</span>
-                      <span>{naira(item.qty * item.price)}</span>
-                    </div>
-                  </li>
-                ))}
+                  {items.map((item) => (
+                    <li key={item.id} className="flex gap-4">
+                      <div className="relative h-16 w-16 shrink-0">
+                        <ProductImage src={item.image} alt={item.name} aspect="aspect-square" />
+                        <span className="absolute -right-2 -top-2 z-10 grid h-5 w-5 place-items-center rounded-full bg-noir text-[10px] text-nude">
+                          {item.qty}
+                        </span>
+                      </div>
+                      <div className="flex flex-1 items-start justify-between gap-2 text-sm">
+                        <div>
+                          <span className="font-serif">{item.name}</span>
+                          {item.variant && (
+                            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                              {item.variant.label}
+                            </p>
+                          )}
+                        </div>
+                        <span>{naira(item.qty * item.price)}</span>
+                      </div>
+                    </li>
+                  ))}
               </ul>
               <div className="my-6 h-px bg-border" />
               <dl className="space-y-2 text-sm">

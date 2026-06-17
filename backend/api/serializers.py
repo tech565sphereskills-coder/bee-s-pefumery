@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Category, Product, Order, OrderItem, StoreSetting, ProductImage, Review, NewsletterSubscriber, Coupon, ContactMessage
+from .models import Category, Product, Variant, Order, OrderItem, StoreSetting, ProductImage, Review, NewsletterSubscriber, Coupon, ContactMessage
 from django.contrib.auth.models import User
 
 class UserSerializer(serializers.ModelSerializer):
@@ -17,6 +17,11 @@ class ProductImageSerializer(serializers.ModelSerializer):
         model = ProductImage
         fields = ['id', 'image', 'alt_text']
 
+class VariantSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Variant
+        fields = ['id', 'size_ml', 'price', 'stock', 'sku', 'is_active', 'sort_order']
+
 class ReviewSerializer(serializers.ModelSerializer):
     user_name = serializers.ReadOnlyField(source='user.username')
     
@@ -28,8 +33,10 @@ class ProductSerializer(serializers.ModelSerializer):
     category_name = serializers.ReadOnlyField(source='category.name')
     gallery = ProductImageSerializer(many=True, read_only=True)
     reviews = ReviewSerializer(many=True, read_only=True)
+    variants = VariantSerializer(many=True, read_only=True)
     average_rating = serializers.SerializerMethodField()
     review_count = serializers.SerializerMethodField()
+    min_price = serializers.SerializerMethodField()
     
     class Meta:
         model = Product
@@ -44,12 +51,24 @@ class ProductSerializer(serializers.ModelSerializer):
     def get_review_count(self, obj):
         return obj.reviews.count()
 
+    def get_min_price(self, obj):
+        active = obj.variants.filter(is_active=True)
+        if active.exists():
+            return float(active.order_by('price').first().price)
+        return float(obj.price)
+
 class OrderItemSerializer(serializers.ModelSerializer):
     product_name = serializers.ReadOnlyField(source='product.name')
+    variant_name = serializers.SerializerMethodField()
     
     class Meta:
         model = OrderItem
         fields = '__all__'
+
+    def get_variant_name(self, obj):
+        if obj.variant:
+            return f"{obj.variant.size_ml}ml"
+        return obj.variant_label or ""
 
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)
@@ -66,13 +85,25 @@ class OrderSerializer(serializers.ModelSerializer):
             product_id = item_data.get('product')
             quantity = item_data.get('quantity', 1)
             price = item_data.get('price')
+            variant_id = item_data.get('variant_id')
+            variant_label = item_data.get('variant_label', '')
             try:
                 product = Product.objects.get(id=product_id)
+                variant = None
+                if variant_id:
+                    try:
+                        variant = Variant.objects.get(id=variant_id)
+                    except Variant.DoesNotExist:
+                        pass
+                if not variant_label and variant:
+                    variant_label = f"{variant.size_ml}ml"
                 OrderItem.objects.create(
                     order=order,
                     product=product,
+                    variant=variant,
+                    variant_label=variant_label,
                     quantity=quantity,
-                    price=price or product.price
+                    price=price or (variant.price if variant else product.price)
                 )
             except Product.DoesNotExist:
                 pass

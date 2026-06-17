@@ -100,6 +100,18 @@ function ProductDetail() {
   const [region, setRegion] = useState("Lagos");
   const [city, setCity] = useState("Lekki-Ajah (Sangotedo)");
 
+  const variants: any[] = product.variants?.filter((v: any) => v.is_active) || [];
+  const [selectedVariant, setSelectedVariant] = useState<any>(variants[0] || null);
+
+  useEffect(() => {
+    if (variants.length > 0 && !selectedVariant) {
+      setSelectedVariant(variants[0]);
+    }
+  }, [product.id]);
+
+  const displayPrice = selectedVariant ? selectedVariant.price : product.price;
+  const displayStock = selectedVariant ? selectedVariant.stock : product.stock;
+
   const add = useCart((s) => s.add);
   const toggle = useWishlist((s) => s.toggle);
   const ids = useWishlist((s) => s.ids);
@@ -121,8 +133,15 @@ function ProductDetail() {
   const gallery = product.gallery?.length > 0 ? product.gallery.map((g: any) => g.image) : [product.image];
 
   const handleAdd = () => {
-    add(product, qty);
-    toast.success(`${product.name} added to cart`, { description: `Quantity: ${qty}` });
+    const variantInfo = selectedVariant ? {
+      id: selectedVariant.id,
+      size_ml: selectedVariant.size_ml,
+      price: parseFloat(selectedVariant.price),
+      label: `${selectedVariant.size_ml}ml`,
+    } : undefined;
+    add(product, qty, variantInfo);
+    const label = variantInfo ? ` ${variantInfo.label} × ${qty}` : `Quantity: ${qty}`;
+    toast.success(`${product.name} added to cart`, { description: label });
   };
 
   const handleShare = () => {
@@ -133,7 +152,8 @@ function ProductDetail() {
     }
   };
 
-  const formattedPrice = naira(product.price);
+  const formattedPrice = naira(displayPrice);
+  const hasMultipleVariants = variants.length > 1;
 
   return (
     <div className="bg-[#f5f5f5] min-h-screen py-4 font-sans text-gray-800 text-left">
@@ -247,9 +267,14 @@ function ProductDetail() {
                   <div className="space-y-1">
                     <div className="text-3xl font-bold text-gray-900 tracking-tight">
                       {formattedPrice}
+                      {hasMultipleVariants && selectedVariant && (
+                        <span className="text-base font-normal text-gray-500 ml-2">
+                          / {selectedVariant.size_ml}ml
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-center gap-2 pt-1">
-                      {product.stock > 0 ? (
+                      {displayStock > 0 ? (
                         <>
                           <span className="text-xs bg-green-50 text-green-700 px-2.5 py-0.5 font-bold rounded-sm border border-green-200 uppercase tracking-wider">
                             In Stock
@@ -267,12 +292,31 @@ function ProductDetail() {
                   </div>
 
 
-                  <div className="pt-2">
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Variation Available</p>
-                    <button className="border-2 border-[#8A0373] text-[#8A0373] text-xs font-bold px-4 py-2 rounded-sm bg-orange-50/20 shadow-sm transition-all">
-                      100 ml
-                    </button>
-                  </div>
+                  {hasMultipleVariants && (
+                    <div className="pt-2">
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">
+                        Select Size
+                      </p>
+                      <div className="flex gap-2">
+                        {variants.map((v: any) => (
+                          <button
+                            key={v.id}
+                            onClick={() => {
+                              setSelectedVariant(v);
+                              setQty(1);
+                            }}
+                            className={`text-xs font-bold px-5 py-2.5 rounded-sm transition-all ${
+                              selectedVariant?.id === v.id
+                                ? "border-2 border-[#8A0373] text-[#8A0373] bg-orange-50/30 shadow-sm"
+                                : "border border-gray-300 text-gray-600 bg-white hover:border-gray-500"
+                            }`}
+                          >
+                            {v.size_ml}ml — {naira(v.price)}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
 
                   <div className="pt-4 border-t border-gray-100 space-y-4">
@@ -297,7 +341,7 @@ function ProductDetail() {
 
                       <button
                         onClick={handleAdd}
-                        disabled={product.stock === 0}
+                        disabled={displayStock === 0}
                         className="flex-1 flex items-center justify-center gap-3 h-12 bg-[#8A0373] hover:bg-[#9F2187] text-white font-bold text-xs uppercase tracking-wider rounded-sm shadow-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <ShoppingCart className="h-5 w-5" />

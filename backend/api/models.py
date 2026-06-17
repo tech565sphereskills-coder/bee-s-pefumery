@@ -35,6 +35,22 @@ class ProductImage(models.Model):
     def __str__(self):
         return f"Gallery image for {self.product.name}"
 
+class Variant(models.Model):
+    product = models.ForeignKey(Product, related_name='variants', on_delete=models.CASCADE)
+    size_ml = models.IntegerField(help_text="Size in milliliters (e.g., 30, 50, 100)")
+    price = models.DecimalField(max_digits=12, decimal_places=2)
+    stock = models.IntegerField(default=0)
+    sku = models.CharField(max_length=50, blank=True)
+    is_active = models.BooleanField(default=True)
+    sort_order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['sort_order', 'size_ml']
+        unique_together = ['product', 'size_ml']
+
+    def __str__(self):
+        return f"{self.product.name} - {self.size_ml}ml"
+
 class Review(models.Model):
     product = models.ForeignKey(Product, related_name='reviews', on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -73,6 +89,8 @@ class Order(models.Model):
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
+    variant = models.ForeignKey(Variant, on_delete=models.SET_NULL, null=True, blank=True)
+    variant_label = models.CharField(max_length=20, blank=True, help_text="e.g. 50ml")
     quantity = models.IntegerField(default=1)
     price = models.DecimalField(max_digits=12, decimal_places=2)
 
