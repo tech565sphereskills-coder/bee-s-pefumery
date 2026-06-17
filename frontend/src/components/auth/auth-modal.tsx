@@ -7,7 +7,7 @@ import { Logo } from "@/components/brand/logo";
 
 const loginSchema = z.object({
   email: z.string().trim().email({ message: "Enter a valid email" }).max(255),
-  password: z.string().min(6, { message: "Password must be at least 6 characters" }).max(100),
+  password: z.string().min(8, { message: "Password must be at least 8 characters" }).max(100),
 });
 
 const registerSchema = loginSchema.extend({

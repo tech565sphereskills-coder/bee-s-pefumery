@@ -20,7 +20,7 @@ function Wishlist() {
   const toggle = useWishlist((s) => s.toggle);
   const add = useCart((s) => s.add);
 
-  const items = products.filter((p) => ids.includes(p.id));
+  const items = products.filter((p) => ids.includes(String(p.id)));
 
   if (items.length === 0) {
     return (
@@ -45,7 +45,7 @@ function Wishlist() {
 
   const moveAll = () => {
     items.forEach((p) => add(p, 1));
-    items.forEach((p) => toggle(p.id));
+    items.forEach((p) => toggle(String(p.id)));
     toast.success("Wishlist moved to cart");
   };
 
@@ -78,7 +78,7 @@ function Wishlist() {
             >
               <Link
                 to="/shop/$productId"
-                params={{ productId: p.id }}
+                params={{ productId: String(p.id) }}
                 className="block w-full sm:w-32 shrink-0 bg-secondary"
               >
                 <img
@@ -92,7 +92,7 @@ function Wishlist() {
                   <p className="eyebrow text-muted-foreground">{p.brand}</p>
                   <Link
                     to="/shop/$productId"
-                    params={{ productId: p.id }}
+                    params={{ productId: String(p.id) }}
                     className="mt-2 block font-serif text-2xl hover:text-gold"
                   >
                     {p.name}
@@ -100,7 +100,7 @@ function Wishlist() {
                   <p className="mt-2 text-sm text-muted-foreground">{naira(p.price)}</p>
                 </div>
                 <button
-                  onClick={() => toggle(p.id)}
+                  onClick={() => toggle(String(p.id))}
                   aria-label="Remove"
                   className="text-muted-foreground hover:text-foreground"
                 >
@@ -111,7 +111,7 @@ function Wishlist() {
                 <button
                   onClick={() => {
                     add(p, 1);
-                    toggle(p.id);
+                    toggle(String(p.id));
                     toast.success(`${p.name} moved to cart`);
                   }}
                   className="inline-flex items-center justify-center gap-2 bg-foreground px-5 py-3 eyebrow text-background hover:bg-gold hover:text-nude transition-colors"

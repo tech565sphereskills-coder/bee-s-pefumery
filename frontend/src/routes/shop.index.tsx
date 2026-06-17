@@ -24,7 +24,7 @@ interface Product {
 }
 
 const searchSchema = z.object({
-  category: z.enum(["men", "women", "unisex"]).optional(),
+  category: z.string().optional(),
   brand: z.string().optional(),
   sort: z.enum(["newest", "price-asc", "price-desc"]).optional(),
   q: z.string().optional(),
@@ -50,12 +50,26 @@ export const Route = createFileRoute("/shop/")({
 function Shop() {
   const navigate = useNavigate({ from: "/shop" });
   const sp = Route.useSearch();
-  const [price, setPrice] = useState<[number, number]>([0, 100000]);
+  const [price, setPrice] = useState<[number, number]>([0, 10000000]);
   const [query, setQuery] = useState(sp.q ?? "");
   const [loading, setLoading] = useState(true);
   const [productsList, setProductsList] = useState<Product[]>([]);
   const [nextPage, setNextPage] = useState<string | null>(null);
   const [, setTotalCount] = useState(0);
+  const [categories, setCategories] = useState<{ id: number; name: string; slug: string }[]>([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await api.get("/categories/");
+        const data = res.data.results || res.data;
+        setCategories(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error("Failed to fetch categories", err);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   const fetchProducts = useCallback(
     async (isLoadMore = false) => {
@@ -101,6 +115,21 @@ function Shop() {
     fetchProducts();
   }, [sp.category, sp.brand, sp.q, fetchProducts]);
 
+  const maxPriceLimit = useMemo(() => {
+    if (productsList.length === 0) return 10000000;
+    const maxVal = Math.max(...productsList.map((p) => parseFloat(p.price) || 0));
+    return Math.max(10000000, Math.ceil(maxVal / 100000) * 100000);
+  }, [productsList]);
+
+  useEffect(() => {
+    setPrice((prev) => {
+      if (prev[1] < maxPriceLimit) {
+        return [prev[0], maxPriceLimit];
+      }
+      return prev;
+    });
+  }, [maxPriceLimit]);
+
   const filtered = useMemo(() => {
     const result = [...productsList].filter((p) => {
       if (parseFloat(p.price) < price[0] || parseFloat(p.price) > price[1]) return false;
@@ -124,14 +153,21 @@ function Shop() {
     <div className="space-y-10">
       <div>
         <p className="eyebrow text-gold">Category</p>
-        <div className="mt-5 space-y-2 text-sm">
-          {(["women", "men", "unisex"] as const).map((c) => (
+        <div className="mt-5 space-y-2 text-sm text-left">
+          {categories.map((c) => (
             <button
-              key={c}
-              onClick={() => setCategory(sp.category === c ? undefined : c)}
-              className={`block capitalize ${sp.category === c ? "text-gold" : "text-foreground/70 hover:text-foreground"}`}
+              key={c.id}
+              onClick={() => {
+                const val = String(c.id);
+                setCategory(sp.category === val || sp.category === c.slug ? undefined : val);
+              }}
+              className={`block capitalize text-left ${
+                sp.category === String(c.id) || sp.category === c.slug
+                  ? "text-gold font-medium"
+                  : "text-foreground/70 hover:text-foreground"
+              }`}
             >
-              {c}
+              {c.name}
             </button>
           ))}
         </div>
@@ -157,8 +193,8 @@ function Shop() {
             value={price}
             onValueChange={(v) => setPrice([v[0], v[1]] as [number, number])}
             min={0}
-            max={100000}
-            step={5000}
+            max={maxPriceLimit}
+            step={25000}
           />
           <div className="mt-3 flex justify-between text-xs text-muted-foreground">
             <span>₦{price[0].toLocaleString()}</span>
@@ -246,7 +282,7 @@ function Shop() {
                   onClick={() => {
                     navigate({ search: {} });
                     setQuery("");
-                    setPrice([0, 100000]);
+                    setPrice([0, maxPriceLimit]);
                   }}
                   className="mt-6 eyebrow text-gold hover:text-foreground"
                 >

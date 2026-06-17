@@ -16,6 +16,7 @@ export type Profile = {
   fullName: string;
   email: string;
   phone: string;
+  avatar?: string;
 };
 
 type ProfileState = {

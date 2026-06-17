@@ -10,6 +10,12 @@ interface Category {
   name: string;
 }
 
+interface ProductImage {
+  id: number;
+  image: string;
+  alt_text?: string;
+}
+
 interface Product {
   id: number;
   name: string;
@@ -28,6 +34,7 @@ interface Product {
     heart: string[];
     base: string[];
   };
+  gallery?: ProductImage[];
 }
 
 interface ProductModalProps {
@@ -60,6 +67,8 @@ export function ProductModal({ isOpen, onClose, product, onSuccess }: ProductMod
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [gallery, setGallery] = useState<{ id?: number; file?: File; preview: string; isExisting?: boolean }[]>([]);
+  const [deletedGalleryIds, setDeletedGalleryIds] = useState<number[]>([]);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -90,6 +99,18 @@ export function ProductModal({ isOpen, onClose, product, onSuccess }: ProductMod
         notes: product.notes || { top: [], heart: [], base: [] },
       });
       setImagePreview(product.image || null);
+      if (product.gallery) {
+        setGallery(
+          product.gallery.map((item) => ({
+            id: item.id,
+            preview: item.image,
+            isExisting: true,
+          }))
+        );
+      } else {
+        setGallery([]);
+      }
+      setDeletedGalleryIds([]);
     } else {
       setFormData({
         name: "",
@@ -105,6 +126,8 @@ export function ProductModal({ isOpen, onClose, product, onSuccess }: ProductMod
         notes: { top: [], heart: [], base: [] },
       });
       setImagePreview(null);
+      setGallery([]);
+      setDeletedGalleryIds([]);
     }
     setImageFile(null);
   }, [product, isOpen]);
@@ -115,6 +138,28 @@ export function ProductModal({ isOpen, onClose, product, onSuccess }: ProductMod
       setImageFile(file);
       setImagePreview(URL.createObjectURL(file));
     }
+  };
+
+  const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      const newImages = Array.from(files).map((file) => ({
+        file,
+        preview: URL.createObjectURL(file),
+        isExisting: false,
+      }));
+      setGallery((prev) => [...prev, ...newImages]);
+    }
+  };
+
+  const handleRemoveGalleryItem = (index: number) => {
+    const item = gallery[index];
+    if (item.isExisting && item.id) {
+      setDeletedGalleryIds((prev) => [...prev, item.id!]);
+    } else if (item.preview) {
+      URL.revokeObjectURL(item.preview);
+    }
+    setGallery((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -142,12 +187,28 @@ export function ProductModal({ isOpen, onClose, product, onSuccess }: ProductMod
       const data = new FormData();
       Object.entries(finalFormData).forEach(([key, value]) => {
         if (value !== null && value !== undefined && value !== "") {
-          data.append(key, value.toString());
+          if (key === "notes") {
+            data.append(key, JSON.stringify(value));
+          } else {
+            data.append(key, value.toString());
+          }
         }
       });
 
       if (imageFile) {
         data.append("image", imageFile);
+      }
+
+      // Append new gallery images
+      gallery.forEach((item) => {
+        if (item.file) {
+          data.append("gallery_images", item.file);
+        }
+      });
+
+      // Append deleted gallery image IDs
+      if (deletedGalleryIds.length > 0) {
+        data.append("deleted_gallery_images", JSON.stringify(deletedGalleryIds));
       }
 
       await api({
@@ -249,6 +310,44 @@ export function ProductModal({ isOpen, onClose, product, onSuccess }: ProductMod
                   onChange={handleImageChange}
                   className="hidden"
                 />
+              </div>
+            </div>
+
+            {/* Gallery Images Area */}
+            <div className="space-y-4">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">
+                Product Gallery (Additional Images)
+              </label>
+              
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                {gallery.map((item, idx) => (
+                  <div key={idx} className="relative aspect-square bg-gray-50 rounded-2xl border border-gray-100 overflow-hidden group">
+                    <img src={item.preview} alt={`Gallery ${idx}`} className="h-full w-full object-cover p-2" />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveGalleryItem(idx)}
+                      className="absolute top-2 right-2 p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+                
+                <div
+                  onClick={() => document.getElementById("gallery-upload")?.click()}
+                  className="aspect-square bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 hover:border-gold/30 hover:bg-gold/2 transition-all cursor-pointer flex flex-col items-center justify-center gap-2 group text-gray-400"
+                >
+                  <Upload className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                  <span className="text-[10px] font-medium text-noir/60">Add Images</span>
+                  <input
+                    id="gallery-upload"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleGalleryChange}
+                    className="hidden"
+                  />
+                </div>
               </div>
             </div>
 

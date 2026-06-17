@@ -24,14 +24,16 @@ export const useCart = create<CartState>()(
       items: [],
       add: (p, qty = 1) =>
         set((s) => {
-          const existing = s.items.find((i) => i.id === p.id);
+          const pid = String(p.id);
+          const price = typeof p.price === "string" ? parseFloat(p.price) : p.price;
+          const existing = s.items.find((i) => i.id === pid);
           if (existing) {
             return {
-              items: s.items.map((i) => (i.id === p.id ? { ...i, qty: i.qty + qty } : i)),
+              items: s.items.map((i) => (i.id === pid ? { ...i, qty: i.qty + qty } : i)),
             };
           }
           return {
-            items: [...s.items, { id: p.id, name: p.name, price: p.price, image: p.image, qty }],
+            items: [...s.items, { id: pid, name: p.name, price, image: p.image, qty }],
           };
         }),
       remove: (id) => set((s) => ({ items: s.items.filter((i) => i.id !== id) })),

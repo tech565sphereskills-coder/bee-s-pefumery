@@ -7,6 +7,12 @@ import api from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { ProductModal } from "@/components/admin/ProductModal";
 
+interface ProductImage {
+  id: number;
+  image: string;
+  alt_text?: string;
+}
+
 interface Product {
   id: number;
   name: string;
@@ -19,6 +25,13 @@ interface Product {
   image?: string;
   is_active: boolean;
   category: number;
+  best_seller?: boolean;
+  notes?: {
+    top: string[];
+    heart: string[];
+    base: string[];
+  };
+  gallery?: ProductImage[];
 }
 
 export const Route = createFileRoute("/admin/products")({
@@ -112,22 +125,22 @@ function AdminProducts() {
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-gray-50">
-                <th className="px-8 py-5 text-xs font-bold uppercase tracking-wider text-gray-400">
+                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400">
                   Product
                 </th>
-                <th className="px-8 py-5 text-xs font-bold uppercase tracking-wider text-gray-400">
+                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400">
                   Brand
                 </th>
-                <th className="px-8 py-5 text-xs font-bold uppercase tracking-wider text-gray-400">
+                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400">
                   Price
                 </th>
-                <th className="px-8 py-5 text-xs font-bold uppercase tracking-wider text-gray-400">
+                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400">
                   Stock
                 </th>
-                <th className="px-8 py-5 text-xs font-bold uppercase tracking-wider text-gray-400">
+                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400">
                   Status
                 </th>
-                <th className="px-8 py-5 text-xs font-bold uppercase tracking-wider text-gray-400 text-right">
+                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400 text-right">
                   Actions
                 </th>
               </tr>
@@ -137,17 +150,26 @@ function AdminProducts() {
                 <tr>
                   <td
                     colSpan={6}
-                    className="px-8 py-20 text-center text-gray-400 eyebrow animate-pulse"
+                    className="px-6 py-12 text-center text-gray-400 eyebrow animate-pulse"
                   >
                     Loading products...
+                  </td>
+                </tr>
+              ) : filteredProducts.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={6}
+                    className="px-6 py-12 text-center text-gray-400 eyebrow"
+                  >
+                    No products found
                   </td>
                 </tr>
               ) : (
                 filteredProducts.map((product) => (
                   <tr key={product.id} className="group hover:bg-gray-50/50 transition-colors">
-                    <td className="px-8 py-5">
-                      <div className="flex items-center gap-4">
-                        <div className="h-14 w-14 rounded-xl bg-gray-100 overflow-hidden flex-none">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-lg bg-gray-100 overflow-hidden flex-none">
                           <img
                             src={
                               product.image ||
@@ -157,34 +179,34 @@ function AdminProducts() {
                             className="h-full w-full object-cover"
                           />
                         </div>
-                        <p className="font-serif text-lg text-noir leading-none">{product.name}</p>
+                        <p className="font-serif text-sm text-noir font-medium leading-tight">{product.name}</p>
                       </div>
                     </td>
-                    <td className="px-8 py-5">
-                      <span className="text-sm text-gray-500">{product.brand}</span>
+                    <td className="px-6 py-4">
+                      <span className="text-xs text-gray-500">{product.brand}</span>
                     </td>
-                    <td className="px-8 py-5">
-                      <span className="font-medium text-noir">
+                    <td className="px-6 py-4">
+                      <span className="text-sm font-medium text-noir">
                         ₦{parseFloat(product.price).toLocaleString()}
                       </span>
                     </td>
-                    <td className="px-8 py-5">
-                      <div className="flex items-center gap-2">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-1.5">
                         <span
                           className={cn(
-                            "font-medium",
+                            "text-sm font-medium",
                             product.stock < 10 ? "text-amber-600" : "text-gray-600",
                           )}
                         >
                           {product.stock}
                         </span>
-                        {product.stock < 10 && <AlertCircle className="h-4 w-4 text-amber-500" />}
+                        {product.stock < 10 && <AlertCircle className="h-3.5 w-3.5 text-amber-500" />}
                       </div>
                     </td>
-                    <td className="px-8 py-5">
+                    <td className="px-6 py-4">
                       <span
                         className={cn(
-                          "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider",
+                          "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider",
                           product.is_active
                             ? "bg-green-50 text-green-600"
                             : "bg-red-50 text-red-600",
@@ -199,19 +221,19 @@ function AdminProducts() {
                         {product.is_active ? "Active" : "Inactive"}
                       </span>
                     </td>
-                    <td className="px-8 py-5 text-right">
-                      <div className="flex items-center justify-end gap-2">
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end gap-1.5">
                         <button
                           onClick={() => handleEdit(product)}
-                          className="p-2 hover:bg-white rounded-lg text-gray-400 hover:text-gold transition-all"
+                          className="p-1.5 hover:bg-gray-50 rounded text-gray-400 hover:text-gold transition-all"
                         >
-                          <Edit2 className="h-4 w-4" />
+                          <Edit2 className="h-3.5 w-3.5" />
                         </button>
                         <button
                           onClick={() => handleDelete(product.slug)}
-                          className="p-2 hover:bg-white rounded-lg text-gray-400 hover:text-red-500 transition-all"
+                          className="p-1.5 hover:bg-gray-50 rounded text-gray-400 hover:text-red-500 transition-all"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-3.5 w-3.5" />
                         </button>
                       </div>
                     </td>
@@ -221,76 +243,91 @@ function AdminProducts() {
             </tbody>
           </table>
         </div>
-
-        {/* Mobile Card View */}
-        <div className="lg:hidden divide-y divide-gray-50">
+        {/* Mobile & Tablet Compact Grid View */}
+        <div className="lg:hidden grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 p-4">
           {loading ? (
-            <div className="p-8 text-center text-gray-400 eyebrow animate-pulse">
+            <div className="col-span-full py-20 text-center text-gray-400 eyebrow animate-pulse">
               Loading products...
+            </div>
+          ) : filteredProducts.length === 0 ? (
+            <div className="col-span-full py-20 text-center text-gray-400 eyebrow">
+              No products found
             </div>
           ) : (
             filteredProducts.map((product) => (
-              <div key={product.id} className="p-6 space-y-4">
-                <div className="flex gap-4">
-                  <div className="h-20 w-20 rounded-2xl bg-gray-100 overflow-hidden flex-none">
-                    <img
-                      src={
-                        product.image ||
-                        "https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&q=80&w=200"
-                      }
-                      alt={product.name}
-                      className="h-full w-full object-cover"
+              <div
+                key={product.id}
+                className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-xs hover:border-gold/20 hover:shadow-xs transition-all duration-300 flex flex-col group relative"
+              >
+                {/* Top: Product Image */}
+                <div className="aspect-square bg-gray-50 overflow-hidden flex-none relative">
+                  <img
+                    src={
+                      product.image ||
+                      "https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&q=80&w=200"
+                    }
+                    alt={product.name}
+                    className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  {/* Active Status Badge Overlay */}
+                  <span
+                    className={cn(
+                      "absolute top-2 left-2 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-wider bg-white/95 backdrop-blur shadow-xs",
+                      product.is_active
+                        ? "text-green-600"
+                        : "text-red-600",
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        "h-1 w-1 rounded-full",
+                        product.is_active ? "bg-green-600" : "bg-red-600",
+                      )}
                     />
+                    {product.is_active ? "Active" : "Inactive"}
+                  </span>
+                </div>
+
+                {/* Middle: Details */}
+                <div className="p-3 flex-1 flex flex-col justify-between gap-1.5 min-w-0">
+                  <div className="space-y-0.5">
+                    <p className="text-[9px] uppercase tracking-wider text-gold font-bold truncate">
+                      {product.brand}
+                    </p>
+                    <h4 className="font-serif text-xs text-noir font-medium line-clamp-2 h-8 leading-tight" title={product.name}>
+                      {product.name}
+                    </h4>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <h4 className="font-serif text-lg text-noir truncate">{product.name}</h4>
-                        <p className="text-xs text-gray-400 uppercase tracking-widest">
-                          {product.brand}
-                        </p>
-                      </div>
-                      <span
-                        className={cn(
-                          "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-wider",
-                          product.is_active
-                            ? "bg-green-50 text-green-600"
-                            : "bg-red-50 text-red-600",
-                        )}
-                      >
-                        {product.is_active ? "Active" : "Inactive"}
-                      </span>
-                    </div>
-                    <div className="mt-2 flex items-center justify-between">
-                      <p className="font-serif text-gold font-bold">
-                        ₦{parseFloat(product.price).toLocaleString()}
-                      </p>
-                      <div className="flex items-center gap-2 text-xs">
-                        <span className="text-gray-400">Stock:</span>
-                        <span
-                          className={cn(
-                            "font-bold",
-                            product.stock < 10 ? "text-amber-600" : "text-gray-600",
-                          )}
-                        >
-                          {product.stock}
-                        </span>
-                      </div>
-                    </div>
+                  <div className="space-y-0.5 mt-auto">
+                    <p className="font-bold text-noir text-xs sm:text-sm">
+                      ₦{parseFloat(product.price).toLocaleString()}
+                    </p>
+                    <p
+                      className={cn(
+                        "text-[10px]",
+                        product.stock < 10 ? "text-amber-600 font-semibold" : "text-gray-500"
+                      )}
+                    >
+                      {product.stock} in stock
+                    </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 pt-2">
+
+                {/* Bottom: Quick Actions */}
+                <div className="flex border-t border-gray-50 divide-x divide-gray-50 bg-gray-50/50">
                   <button
                     onClick={() => handleEdit(product)}
-                    className="flex-1 bg-gray-50 text-noir text-xs font-bold uppercase tracking-widest py-3 rounded-xl hover:bg-gray-100 transition-colors flex items-center justify-center gap-2"
+                    className="flex-1 py-2 text-center text-[10px] font-bold uppercase tracking-wider text-gray-600 hover:bg-gold hover:text-white transition-all flex items-center justify-center gap-1 cursor-pointer"
+                    title="Edit Product"
                   >
-                    <Edit2 className="h-3.5 w-3.5" /> Edit
+                    <Edit2 className="h-3 w-3" /> Edit
                   </button>
                   <button
                     onClick={() => handleDelete(product.slug)}
-                    className="flex-1 bg-red-50 text-red-600 text-xs font-bold uppercase tracking-widest py-3 rounded-xl hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
+                    className="flex-1 py-2 text-center text-[10px] font-bold uppercase tracking-wider text-red-500 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center gap-1 cursor-pointer"
+                    title="Delete Product"
                   >
-                    <Trash2 className="h-3.5 w-3.5" /> Delete
+                    <Trash2 className="h-3 w-3" /> Delete
                   </button>
                 </div>
               </div>

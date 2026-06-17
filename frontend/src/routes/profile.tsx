@@ -41,6 +41,7 @@ const profileSchema = z.object({
     .string()
     .trim()
     .regex(/^[+0-9 \-()]{7,20}$/, "Enter a valid phone number"),
+  avatar: z.string().optional(),
 });
 
 const addressSchema = z.object({
@@ -70,6 +71,31 @@ function ProfilePage() {
   const [section, setSection] = useState<Section>("details");
   const [pForm, setPForm] = useState(profile);
   const [pErrors, setPErrors] = useState<Record<string, string>>({});
+
+  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 1 * 1024 * 1024) {
+      toast.error("File is too large", { description: "Maximum image size is 1MB." });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      setPForm((s) => ({ ...s, avatar: base64String }));
+      setProfile({ avatar: base64String });
+      toast.success("Profile picture updated", { description: "Your new avatar has been set." });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleAvatarRemove = () => {
+    setPForm((s) => ({ ...s, avatar: undefined }));
+    setProfile({ avatar: undefined });
+    toast.success("Profile picture removed");
+  };
 
   const [editingId, setEditingId] = useState<string | "new" | null>(null);
   const blank: Omit<Address, "id"> = {
@@ -216,6 +242,66 @@ function ProfilePage() {
                     </span>
                     <h2 className="font-serif text-2xl">Personal Details</h2>
                   </div>
+
+                  {/* Premium Profile Picture Uploader */}
+                  <div className="mt-8 flex flex-col sm:flex-row items-center gap-6 pb-6 border-b border-border/40">
+                    <div className="relative group">
+                      {pForm.avatar ? (
+                        <img
+                          src={pForm.avatar}
+                          alt="Profile Avatar"
+                          className="h-24 w-24 rounded-full object-cover border-2 border-gold shadow-[0_0_15px_rgba(212,175,55,0.15)] group-hover:scale-105 transition-transform duration-300"
+                        />
+                      ) : (
+                        <div className="h-24 w-24 rounded-full bg-gold/10 border-2 border-gold/30 flex items-center justify-center text-gold font-serif text-2xl font-semibold shadow-[0_0_15px_rgba(212,175,55,0.05)] group-hover:scale-105 transition-transform duration-300">
+                          {pForm.fullName
+                            ? pForm.fullName
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")
+                                .toUpperCase()
+                                .slice(0, 2)
+                            : "U"}
+                        </div>
+                      )}
+                      <label className="absolute inset-0 rounded-full bg-noir/50 opacity-0 group-hover:opacity-100 flex items-center justify-center text-[10px] text-nude font-medium cursor-pointer transition-opacity duration-300 tracking-[0.1em] uppercase">
+                        Change
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleAvatarUpload}
+                        />
+                      </label>
+                    </div>
+                    <div className="flex-1 text-center sm:text-left space-y-1.5">
+                      <p className="eyebrow text-gold text-xs">Profile Picture</p>
+                      <p className="text-xs text-muted-foreground">
+                        Upload a custom image (JPEG, PNG, max 1MB) or let it fallback to your initials.
+                      </p>
+                      <div className="flex flex-wrap justify-center sm:justify-start gap-3 mt-2">
+                        <label className="cursor-pointer border border-foreground/30 px-4 py-2 text-xs font-semibold eyebrow hover:border-gold hover:text-gold transition-colors">
+                          Upload File
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleAvatarUpload}
+                          />
+                        </label>
+                        {pForm.avatar && (
+                          <button
+                            type="button"
+                            onClick={handleAvatarRemove}
+                            className="border border-destructive/30 px-4 py-2 text-xs font-semibold eyebrow text-destructive hover:bg-destructive hover:text-white transition-all duration-300"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
                   <form
                     onSubmit={handleSaveProfile}
                     className="mt-8 grid gap-5 sm:grid-cols-2"

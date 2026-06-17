@@ -10,7 +10,7 @@ export const useSettings = create<SettingsState>((set) => ({
   settings: null,
   fetchSettings: async () => {
     try {
-      const res = await axios.get("http://localhost:8000/api/settings/1/");
+      const res = await axios.get("http://127.0.0.1:8000/api/settings/1/");
       set({ settings: res.data });
     } catch (err) {
       console.error("Failed to fetch settings", err);

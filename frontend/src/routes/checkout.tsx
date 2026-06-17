@@ -236,7 +236,7 @@ function Checkout() {
   const startPayment = async () => {
     if (!validate()) return;
     setPaymentError(null);
-    const reference = lastRef ?? generateOrderRef();
+    const reference = generateOrderRef();
     setLastRef(reference);
     setSubmitting(true);
 
@@ -259,7 +259,7 @@ function Checkout() {
       try {
         await payWithPaystack({
           email,
-          amountNaira: total,
+          amountNaira: PAYSTACK_PUBLIC_KEY.startsWith("pk_test_") && total >= 400000 ? 5000 : total,
           reference,
           metadata: {
             custom_fields: [

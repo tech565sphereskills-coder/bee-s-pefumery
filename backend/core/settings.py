@@ -18,8 +18,8 @@ from datetime import timedelta
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Load .env file
-load_dotenv(os.path.join(BASE_DIR, '.env'))
+# Load .env file (Force override to apply runtime changes)
+load_dotenv(os.path.join(BASE_DIR, '.env'), override=True)
 
 
 # Quick-start development settings - unsuitable for production
@@ -197,6 +197,14 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 9,
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '60/minute',
+        'user': '1000/day',
+    },
 }
 
 # JWT settings
@@ -237,8 +245,8 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', "Bee's Perfumery <noreply@beesperfumery.com>")
 
-# Use console backend in development if no credentials provided
-if not EMAIL_HOST_USER:
+# Use console backend in development if no credentials provided or if they are placeholder values
+if not EMAIL_HOST_USER or EMAIL_HOST_USER == 'your-email@gmail.com':
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Security Settings for Production

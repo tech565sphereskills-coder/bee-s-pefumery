@@ -55,10 +55,10 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
         </div>
 
         <div className="mt-5 space-y-1">
-          <p className="eyebrow text-muted-foreground">
+          <p className="eyebrow text-muted-foreground truncate block">
             {product.category_name || product.category}
           </p>
-          <h3 className="font-serif text-lg leading-tight transition-colors group-hover:text-gold">
+          <h3 className="font-serif text-lg leading-tight transition-colors group-hover:text-gold line-clamp-2 h-12">
             {product.name}
           </h3>
           <p className="text-sm text-muted-foreground">{naira(product.price)}</p>

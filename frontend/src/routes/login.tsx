@@ -10,7 +10,7 @@ import axios from "axios";
 import { useAuth } from "@/store/auth";
 import { useProfile } from "@/store/profile";
 
-const API_URL = "http://localhost:8000/api";
+const API_URL = "http://127.0.0.1:8000/api";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -27,7 +27,7 @@ export const Route = createFileRoute("/login")({
 
 const loginSchema = z.object({
   email: z.string().trim().email("Enter a valid email").max(255),
-  password: z.string().min(6, "Password must be at least 6 characters").max(100),
+  password: z.string().min(8, "Password must be at least 8 characters").max(100),
 });
 const registerSchema = loginSchema.extend({
   name: z.string().trim().min(2, "Name is too short").max(80),
@@ -59,14 +59,30 @@ function Login() {
         const res = await axios.post(`${API_URL}/auth/google/`, {
           access_token: tokenResponse.access_token,
         });
-        const { access_token, refresh_token, user } = res.data;
-        setAuth(access_token, refresh_token, user);
+        const { access, refresh, user } = res.data;
+        let googleAvatar = undefined;
+        try {
+          const gUserInfo = await axios.get("https://www.googleapis.com/oauth2/v3/userinfo", {
+            headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+          });
+          if (gUserInfo.data?.picture) {
+            googleAvatar = gUserInfo.data.picture;
+          }
+        } catch (gErr) {
+          console.error("Failed to fetch Google userinfo:", gErr);
+        }
 
-        // Sync user details to profile store
+        setAuth(access, refresh, user);
+
+        
         if (user) {
           const fullName =
             `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.username;
-          setProfile({ fullName, email: user.email });
+          setProfile({
+            fullName,
+            email: user.email,
+            ...(googleAvatar ? { avatar: googleAvatar } : {}),
+          });
         }
 
         toast.success("Welcome back!");
@@ -128,8 +144,8 @@ function Login() {
           email: values.email,
           password: values.password,
         });
-        const { access_token, refresh_token, user } = res.data;
-        setAuth(access_token, refresh_token, user);
+        const { access, refresh, user } = res.data;
+        setAuth(access, refresh, user);
 
         // Sync user details
         if (user) {
@@ -157,11 +173,40 @@ function Login() {
         toast.success("Account created! You can now sign in.");
         setMode("login");
       }
-    } catch (err: unknown) {
-      const error = err as { response?: { data?: { non_field_errors?: string[] } } };
-      toast.error(mode === "login" ? "Login failed" : "Registration failed", {
-        description: error.response?.data?.non_field_errors?.[0] || "Check your credentials.",
-      });
+    } catch (err: any) {
+      const serverErrors = err.response?.data;
+      if (serverErrors && typeof serverErrors === "object") {
+        const fe: Record<string, string> = {};
+        let toastDesc = "";
+
+        Object.entries(serverErrors).forEach(([key, val]) => {
+          const errMsg = Array.isArray(val) ? val.join(" ") : String(val);
+          if (key === "username" || key === "email") {
+            fe.email = errMsg;
+          } else if (key === "first_name") {
+            fe.name = errMsg;
+          } else if (key === "phone_number") {
+            fe.phone = errMsg;
+          } else if (key === "password" || key === "password1" || key === "password2") {
+            fe.password = errMsg;
+          } else if (key === "non_field_errors") {
+            toastDesc = errMsg;
+          } else {
+            toastDesc += `${key}: ${errMsg} `;
+          }
+        });
+
+        if (Object.keys(fe).length > 0) {
+          setErrors(fe);
+        }
+        toast.error(mode === "login" ? "Login failed" : "Registration failed", {
+          description: toastDesc || "Please check the highlighted fields.",
+        });
+      } else {
+        toast.error(mode === "login" ? "Login failed" : "Registration failed", {
+          description: "An unexpected error occurred. Please try again.",
+        });
+      }
     } finally {
       setSubmitting(false);
     }
@@ -174,7 +219,7 @@ function Login() {
 
   return (
     <div className="grid min-h-screen grid-cols-1 lg:grid-cols-2">
-      {/* Visual side */}
+      
       <div className="relative hidden bg-noir text-nude grain lg:block">
         <div className="absolute inset-0 bg-linear-to-br from-noir via-noir to-noir/70" />
         <div
@@ -205,7 +250,7 @@ function Login() {
         </div>
       </div>
 
-      {/* Form side — mobile-first */}
+      
       <div className="flex min-h-screen items-center justify-center bg-background px-6 py-20 lg:px-12">
         <div className="w-full max-w-md">
           <div key={mode + (forgotSent ? "-sent" : "")}>

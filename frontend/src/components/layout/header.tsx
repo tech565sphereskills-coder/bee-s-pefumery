@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { ShoppingBag, Menu, X, User, LogOut } from "lucide-react";
+import { ShoppingBag, Menu, X, User, LogOut, ChevronDown, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart, cartCount } from "@/store/cart";
 import { useAuth } from "@/store/auth";
+import { useProfile } from "@/store/profile";
 import { motion, AnimatePresence } from "framer-motion";
 
 export function Header() {
@@ -11,7 +12,24 @@ export function Header() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout, user } = useAuth();
+  const profile = useProfile((s) => s.profile);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const displayName = profile.fullName
+    ? profile.fullName.split(" ")[0]
+    : user
+      ? user.first_name || user.username
+      : "User";
+
+  const initials = profile.fullName
+    ? profile.fullName.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
+    : user
+      ? (user.first_name?.[0] || user.username?.[0] || "U").toUpperCase()
+      : "U";
+
+  const avatarUrl = profile.avatar || user?.avatar;
+
   const items = useCart((s) => s.items);
   const count = cartCount(items);
   const path = useRouterState({ select: (r) => r.location.pathname });
@@ -83,19 +101,81 @@ export function Header() {
             </nav>
 
             {isAuthenticated ? (
-              <div className="hidden md:flex items-center gap-4">
-                <Link
-                  to="/profile"
-                  className="eyebrow flex items-center gap-2 hover:text-gold transition-colors"
-                >
-                  <User className="h-4 w-4" /> Profile
-                </Link>
+              <div 
+                className="hidden md:block relative"
+                onMouseEnter={() => setDropdownOpen(true)}
+                onMouseLeave={() => setDropdownOpen(false)}
+              >
                 <button
-                  onClick={handleLogout}
-                  className="eyebrow flex items-center gap-2 text-muted-foreground hover:text-destructive transition-colors"
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className="flex items-center gap-2 group focus:outline-none py-2"
                 >
-                  <LogOut className="h-4 w-4" />
+                  {avatarUrl ? (
+                    <img
+                      src={avatarUrl}
+                      alt={displayName}
+                      className="h-8 w-8 rounded-full object-cover border border-gold/40 group-hover:border-gold shadow-[0_0_10px_rgba(212,175,55,0.1)] transition-colors duration-300"
+                    />
+                  ) : (
+                    <div className="h-8 w-8 rounded-full bg-gold/10 border border-gold/30 flex items-center justify-center text-gold font-serif text-xs font-semibold group-hover:bg-gold/20 transition-all duration-300 shadow-[0_0_10px_rgba(212,175,55,0.05)]">
+                      {initials}
+                    </div>
+                  )}
+                  <span className="eyebrow text-xs tracking-[0.1em] text-foreground/80 group-hover:text-gold transition-colors flex items-center gap-1 uppercase">
+                    {displayName}
+                    <ChevronDown className={cn("h-3 w-3 transition-transform duration-300", dropdownOpen && "rotate-180")} />
+                  </span>
                 </button>
+
+                <AnimatePresence>
+                  {dropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute right-0 mt-1 w-52 border border-border bg-background p-4 shadow-xl z-50 rounded-sm"
+                    >
+                      <div className="pb-3 mb-2 border-b border-border/40 text-left">
+                        <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Bonjour,</p>
+                        <p className="font-serif text-base text-foreground font-medium truncate">{profile.fullName || user?.username}</p>
+                      </div>
+                      <ul className="space-y-1.5 text-left">
+                        {user?.is_staff && (
+                          <li>
+                            <Link
+                              to="/admin"
+                              onClick={() => setDropdownOpen(false)}
+                              className="eyebrow flex items-center gap-2 text-xs text-gold hover:text-foreground transition-colors py-1"
+                            >
+                              <Shield className="h-3.5 w-3.5" /> Admin Panel
+                            </Link>
+                          </li>
+                        )}
+                        <li>
+                          <Link
+                            to="/profile"
+                            onClick={() => setDropdownOpen(false)}
+                            className="eyebrow flex items-center gap-2 text-xs text-foreground/80 hover:text-gold transition-colors py-1"
+                          >
+                            <User className="h-3.5 w-3.5" /> My Profile
+                          </Link>
+                        </li>
+                        <li>
+                          <button
+                            onClick={() => {
+                              setDropdownOpen(false);
+                              handleLogout();
+                            }}
+                            className="w-full text-left eyebrow flex items-center gap-2 text-xs text-muted-foreground hover:text-destructive transition-colors py-1"
+                          >
+                            <LogOut className="h-3.5 w-3.5" /> Logout
+                          </button>
+                        </li>
+                      </ul>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             ) : (
               <Link
@@ -168,24 +248,59 @@ export function Header() {
               </Link>
 
               {isAuthenticated ? (
-                <>
-                  <Link
-                    to="/profile"
-                    onClick={() => setOpen(false)}
-                    className="font-serif text-2xl opacity-80"
-                  >
-                    Profile
-                  </Link>
-                  <button
-                    onClick={() => {
-                      handleLogout();
-                      setOpen(false);
-                    }}
-                    className="mt-8 w-full border border-destructive/30 px-10 py-4 eyebrow text-destructive hover:bg-destructive hover:text-white transition-colors"
-                  >
-                    Logout
-                  </button>
-                </>
+                <div className="w-full flex flex-col items-center mt-6">
+                  {/* Luxury Profile Card */}
+                  <div className="w-full bg-secondary/30 border border-border/60 p-5 rounded-md flex flex-col items-center text-center space-y-3 mb-6 shadow-sm">
+                    {avatarUrl ? (
+                      <img
+                        src={avatarUrl}
+                        alt={displayName}
+                        className="h-16 w-16 rounded-full object-cover border-2 border-gold shadow-md"
+                      />
+                    ) : (
+                      <div className="h-16 w-16 rounded-full bg-gold/10 border-2 border-gold/30 flex items-center justify-center text-gold font-serif text-lg font-bold shadow-sm">
+                        {initials}
+                      </div>
+                    )}
+                    <div>
+                      <p className="font-serif text-lg text-foreground tracking-tight">
+                        {profile.fullName || user?.username}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate max-w-[220px]">
+                        {profile.email || user?.email}
+                      </p>
+                    </div>
+
+                    {user?.is_staff && (
+                      <Link
+                        to="/admin"
+                        onClick={() => setOpen(false)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1 bg-gold/10 border border-gold/20 text-gold text-[10px] eyebrow uppercase tracking-widest rounded-full hover:bg-gold/20 transition-all duration-300"
+                      >
+                        <Shield className="h-3 w-3" /> Admin Portal
+                      </Link>
+                    )}
+                  </div>
+
+                  <div className="w-full flex flex-col gap-3">
+                    <Link
+                      to="/profile"
+                      onClick={() => setOpen(false)}
+                      className="w-full text-center border border-foreground/30 px-10 py-3.5 eyebrow text-foreground hover:border-gold hover:text-gold transition-colors"
+                    >
+                      My Profile
+                    </Link>
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setOpen(false);
+                      }}
+                      className="w-full text-center border border-destructive/30 px-10 py-3.5 eyebrow text-destructive hover:bg-destructive hover:text-white transition-colors"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                </div>
               ) : (
                 <Link
                   to="/login"

@@ -1,3 +1,4 @@
+import os
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import (
@@ -24,7 +25,7 @@ from .views import (
 
 class GoogleLogin(SocialLoginView):
     adapter_class = GoogleOAuth2Adapter
-    callback_url = "http://localhost:5173/login/callback" # Update for production
+    callback_url = os.getenv('GOOGLE_CALLBACK_URL', 'http://localhost:5174/login/callback')
     client_class = OAuth2Client
 
 router = DefaultRouter()
@@ -42,7 +43,7 @@ urlpatterns = [
     path('dashboard/stats/', DashboardStatsView.as_view(), name='dashboard-stats'),
     path('customers/', CustomerListView.as_view(), name='customer-list'),
     
-    # Auth
+    
     path('auth/', include('dj_rest_auth.urls')),
     path('auth/registration/', include('dj_rest_auth.registration.urls')),
     path('auth/google/', GoogleLogin.as_view(), name='google_login'),

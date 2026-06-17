@@ -59,6 +59,25 @@ class OrderSerializer(serializers.ModelSerializer):
         model = Order
         fields = '__all__'
 
+    def create(self, validated_data):
+        items_data = self.initial_data.get('items', [])
+        order = Order.objects.create(**validated_data)
+        for item_data in items_data:
+            product_id = item_data.get('product')
+            quantity = item_data.get('quantity', 1)
+            price = item_data.get('price')
+            try:
+                product = Product.objects.get(id=product_id)
+                OrderItem.objects.create(
+                    order=order,
+                    product=product,
+                    quantity=quantity,
+                    price=price or product.price
+                )
+            except Product.DoesNotExist:
+                pass
+        return order
+
 class StoreSettingSerializer(serializers.ModelSerializer):
     class Meta:
         model = StoreSetting
@@ -77,6 +96,7 @@ class CouponSerializer(serializers.ModelSerializer):
 class CustomLoginSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
     password = serializers.CharField(style={'input_type': 'password'}, trim_whitespace=False)
+
 
     def validate(self, attrs):
         email = attrs.get('email')
@@ -99,13 +119,20 @@ from dj_rest_auth.registration.serializers import RegisterSerializer
 
 class CustomRegisterSerializer(RegisterSerializer):
     phone_number = serializers.CharField(max_length=20, required=False)
+    first_name = serializers.CharField(max_length=150, required=False)
 
     def get_cleaned_data(self):
         data = super().get_cleaned_data()
         data['phone_number'] = self.validated_data.get('phone_number', '')
+        data['first_name'] = self.validated_data.get('first_name', '')
         return data
 
     def custom_signup(self, request, user):
+        first_name = self.validated_data.get('first_name')
+        if first_name:
+            user.first_name = first_name
+            user.save()
+
         phone_number = self.validated_data.get('phone_number')
         if phone_number:
             user.profile.phone_number = phone_number
