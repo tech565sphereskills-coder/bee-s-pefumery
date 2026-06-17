@@ -1,0 +1,14 @@
+.git
+.gitignore
+*.md
+node_modules/
+__pycache__/
+*.pyc
+.env
+.env.*
+venv/
+.venv/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
