@@ -20,7 +20,9 @@ from .views import (
     DashboardStatsView,
     CustomerListView,
     ContactMessageViewSet,
-    PaystackWebhookView
+    PaystackWebhookView,
+    AbandonedCartViewSet,
+    WishlistViewSet,
 )
 
 class GoogleLogin(SocialLoginView):
@@ -51,4 +53,9 @@ urlpatterns = [
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('webhooks/paystack/', PaystackWebhookView.as_view(), name='paystack-webhook'),
+    path('carts/abandoned/', AbandonedCartViewSet.as_view({'post': 'create', 'patch': 'create'}), name='abandoned-cart'),
+    path('wishlist/', WishlistViewSet.as_view({'get': 'list', 'post': 'create'}), name='wishlist-list'),
+    path('wishlist/toggle/', WishlistViewSet.as_view({'post': 'toggle'}), name='wishlist-toggle'),
+    path('wishlist/<int:pk>/notify/', WishlistViewSet.as_view({'patch': 'notify'}), name='wishlist-notify'),
+    path('wishlist/<int:pk>/', WishlistViewSet.as_view({'delete': 'destroy'}), name='wishlist-detail'),
 ]

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -31,6 +31,31 @@ export const Route = createFileRoute("/checkout")({
   }),
   component: Checkout,
 });
+
+function getCartToken(): string {
+  const key = "bees-abandoned-cart-token";
+  let token = localStorage.getItem(key);
+  if (!token) {
+    token = crypto.randomUUID();
+    localStorage.setItem(key, token);
+  }
+  return token;
+}
+
+async function saveAbandonedCart(email: string, fullName: string, items: any[], subtotal: number) {
+  if (!email || !items.length) return;
+  try {
+    await api.post("carts/abandoned/", {
+      token: getCartToken(),
+      email,
+      full_name: fullName,
+      cart_data: items,
+      total: subtotal,
+    });
+  } catch {
+    // Silently fail — this is non-critical
+  }
+}
 
 function Checkout() {
   const navigate = useNavigate();
@@ -76,6 +101,16 @@ function Checkout() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultAddr]);
+
+  const saveTimer = useRef<ReturnType<typeof setTimeout>>();
+  useEffect(() => {
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    if (!email) return;
+    saveTimer.current = setTimeout(() => {
+      saveAbandonedCart(email, fullName, items, subtotal);
+    }, 2000);
+    return () => { if (saveTimer.current) clearTimeout(saveTimer.current); };
+  }, [email, fullName, items, subtotal]);
 
   const applyAddress = (id: string) => {
     setSelectedAddrId(id);

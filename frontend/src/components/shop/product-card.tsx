@@ -2,11 +2,24 @@ import { Link } from "@tanstack/react-router";
 import { Heart, ShoppingBag } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
-import type { Product } from "@/data/products";
-import { naira } from "@/data/products";
-import { useCart, useWishlist } from "@/store/cart";
+import { useCart } from "@/store/cart";
+import { useWishlist } from "@/store/wishlist";
 import { ProductImage } from "@/components/shop/product-image";
 import { cn } from "@/lib/utils";
+
+interface Product {
+  id: number | string;
+  slug?: string;
+  name: string;
+  brand: string;
+  price: number | string;
+  discount_price?: string;
+  stock: number;
+  image: string;
+  category: number | string;
+  category_name?: string;
+  description: string;
+}
 
 export function ProductCard({ product, index = 0 }: { product: Product; index?: number }) {
   const add = useCart((s) => s.add);
@@ -61,7 +74,22 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
           <h3 className="font-serif text-lg leading-tight transition-colors group-hover:text-gold line-clamp-2 h-12">
             {product.name}
           </h3>
-          <p className="text-sm text-muted-foreground">{naira(product.price)}</p>
+          <div className="flex items-center gap-2">
+            {product.discount_price ? (
+              <>
+                <span className="text-sm font-semibold text-green-600">
+                  ₦{parseFloat(product.discount_price).toLocaleString()}
+                </span>
+                <span className="text-xs text-muted-foreground line-through">
+                  ₦{typeof product.price === "number" ? product.price.toLocaleString() : parseFloat(product.price).toLocaleString()}
+                </span>
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                ₦{typeof product.price === "number" ? product.price.toLocaleString() : parseFloat(product.price).toLocaleString()}
+              </p>
+            )}
+          </div>
         </div>
       </Link>
 

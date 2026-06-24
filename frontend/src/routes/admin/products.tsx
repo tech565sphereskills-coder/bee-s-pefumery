@@ -13,6 +13,16 @@ interface ProductImage {
   alt_text?: string;
 }
 
+interface Variant {
+  id: number;
+  size_ml: number;
+  price: string;
+  stock: number;
+  sku: string;
+  is_active: boolean;
+  sort_order: number;
+}
+
 interface Product {
   id: number;
   name: string;
@@ -26,12 +36,33 @@ interface Product {
   is_active: boolean;
   category: number;
   best_seller?: boolean;
+  variants?: Variant[];
   notes?: {
     top: string[];
     heart: string[];
     base: string[];
   };
   gallery?: ProductImage[];
+}
+
+function StockDisplay({ product }: { product: Product }) {
+  const totalStock = product.variants && product.variants.length > 0
+    ? product.variants.reduce((sum, v) => sum + v.stock, 0)
+    : product.stock;
+
+  return (
+    <div className="flex items-center gap-1.5">
+      <span
+        className={cn(
+          "text-sm font-medium",
+          totalStock < 10 ? "text-amber-600" : "text-gray-600",
+        )}
+      >
+        {totalStock}
+      </span>
+      {totalStock < 10 && <AlertCircle className="h-3.5 w-3.5 text-amber-500" />}
+    </div>
+  );
 }
 
 export const Route = createFileRoute("/admin/products")({
@@ -132,10 +163,13 @@ function AdminProducts() {
                   Brand
                 </th>
                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400">
-                  Price
+                  Price / Discount
                 </th>
                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400">
                   Stock
+                </th>
+                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400">
+                  Variants
                 </th>
                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400">
                   Status
@@ -147,23 +181,23 @@ function AdminProducts() {
             </thead>
             <tbody className="divide-y divide-gray-50">
               {loading ? (
-                <tr>
-                  <td
-                    colSpan={6}
-                    className="px-6 py-12 text-center text-gray-400 eyebrow animate-pulse"
-                  >
-                    Loading products...
-                  </td>
-                </tr>
-              ) : filteredProducts.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={6}
-                    className="px-6 py-12 text-center text-gray-400 eyebrow"
-                  >
-                    No products found
-                  </td>
-                </tr>
+                  <tr>
+                    <td
+                      colSpan={7}
+                      className="px-6 py-12 text-center text-gray-400 eyebrow animate-pulse"
+                    >
+                      Loading products...
+                    </td>
+                  </tr>
+                ) : filteredProducts.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={7}
+                      className="px-6 py-12 text-center text-gray-400 eyebrow"
+                    >
+                      No products found
+                    </td>
+                  </tr>
               ) : (
                 filteredProducts.map((product) => (
                   <tr key={product.id} className="group hover:bg-gray-50/50 transition-colors">
@@ -186,22 +220,32 @@ function AdminProducts() {
                       <span className="text-xs text-gray-500">{product.brand}</span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-sm font-medium text-noir">
-                        ₦{parseFloat(product.price).toLocaleString()}
-                      </span>
+                      {product.discount_price ? (
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-sm font-medium text-green-600">
+                            ₦{parseFloat(product.discount_price).toLocaleString()}
+                          </span>
+                          <span className="text-xs text-gray-400 line-through">
+                            ₦{parseFloat(product.price).toLocaleString()}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-sm font-medium text-noir">
+                          ₦{parseFloat(product.price).toLocaleString()}
+                        </span>
+                      )}
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center gap-1.5">
-                        <span
-                          className={cn(
-                            "text-sm font-medium",
-                            product.stock < 10 ? "text-amber-600" : "text-gray-600",
-                          )}
-                        >
-                          {product.stock}
+                      <StockDisplay product={product} />
+                    </td>
+                    <td className="px-6 py-4">
+                      {product.variants && product.variants.length > 0 ? (
+                        <span className="text-sm text-gray-600">
+                          {product.variants.length} size{product.variants.length > 1 ? 's' : ''}
                         </span>
-                        {product.stock < 10 && <AlertCircle className="h-3.5 w-3.5 text-amber-500" />}
-                      </div>
+                      ) : (
+                        <span className="text-xs text-gray-400">—</span>
+                      )}
                     </td>
                     <td className="px-6 py-4">
                       <span
@@ -299,17 +343,26 @@ function AdminProducts() {
                     </h4>
                   </div>
                   <div className="space-y-0.5 mt-auto">
-                    <p className="font-bold text-noir text-xs sm:text-sm">
-                      ₦{parseFloat(product.price).toLocaleString()}
-                    </p>
-                    <p
-                      className={cn(
-                        "text-[10px]",
-                        product.stock < 10 ? "text-amber-600 font-semibold" : "text-gray-500"
-                      )}
-                    >
-                      {product.stock} in stock
-                    </p>
+                    {product.discount_price ? (
+                      <div className="flex items-center gap-1">
+                        <span className="font-bold text-green-600 text-xs sm:text-sm">
+                          ₦{parseFloat(product.discount_price).toLocaleString()}
+                        </span>
+                        <span className="text-[9px] text-gray-400 line-through">
+                          ₦{parseFloat(product.price).toLocaleString()}
+                        </span>
+                      </div>
+                    ) : (
+                      <p className="font-bold text-noir text-xs sm:text-sm">
+                        ₦{parseFloat(product.price).toLocaleString()}
+                      </p>
+                    )}
+                    <StockDisplay product={product} />
+                    {product.variants && product.variants.length > 0 && (
+                      <p className="text-[9px] text-gray-400">
+                        {product.variants.length} size variant{product.variants.length > 1 ? 's' : ''}
+                      </p>
+                    )}
                   </div>
                 </div>
 

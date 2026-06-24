@@ -92,9 +92,12 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 import { useEffect } from "react";
 import { useSettings } from "@/store/settings";
+import { useWishlist } from "@/store/wishlist";
 
 function RootComponent() {
   const fetchSettings = useSettings((s) => s.fetchSettings);
+  const initWishlist = useWishlist((s) => s.init);
+  const wishlistLoaded = useWishlist((s) => s.loaded);
   const location = useLocation();
   const pathname = location.pathname;
   const isAdminPath = pathname.startsWith("/admin");
@@ -102,6 +105,10 @@ function RootComponent() {
   useEffect(() => {
     fetchSettings();
   }, [fetchSettings]);
+
+  useEffect(() => {
+    if (!wishlistLoaded) initWishlist();
+  }, [initWishlist, wishlistLoaded]);
 
   return (
     <GoogleOAuthProvider clientId="34279959598-d7tittmk6eev7g7sctn3a6l2p2mgnp3l.apps.googleusercontent.com">

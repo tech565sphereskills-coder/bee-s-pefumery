@@ -16,7 +16,7 @@ import json
 import os
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
-from .models import Category, Product, Variant, Order, OrderItem, StoreSetting, Review, Coupon, NewsletterSubscriber, ContactMessage
+from .models import Category, Product, Variant, Order, OrderItem, StoreSetting, Review, Coupon, NewsletterSubscriber, ContactMessage, AbandonedCart
 from .serializers import (
     CategorySerializer, 
     ProductSerializer, 
@@ -27,7 +27,9 @@ from .serializers import (
     ReviewSerializer,
     NewsletterSubscriberSerializer,
     CouponSerializer,
-    ContactMessageSerializer
+    ContactMessageSerializer,
+    AbandonedCartSerializer,
+    WishlistItemSerializer,
 )
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -595,3 +597,101 @@ class PaystackWebhookView(APIView):
             return Response({"status": "success"})
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AbandonedCartViewSet(viewsets.ModelViewSet):
+    queryset = AbandonedCart.objects.all()
+    serializer_class = AbandonedCartSerializer
+    permission_classes = [permissions.AllowAny]
+    http_method_names = ['post', 'patch']
+
+    def create(self, request, *args, **kwargs):
+        token = request.data.get('token')
+        email = request.data.get('email')
+        cart_data = request.data.get('cart_data', [])
+        total = request.data.get('total', 0)
+        full_name = request.data.get('full_name', '')
+
+        if not email or not cart_data:
+            return Response({"error": "Email and cart_data are required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        import uuid
+        if not token:
+            token = str(uuid.uuid4())
+
+        existing = AbandonedCart.objects.filter(token=token).first()
+        defaults = {
+            'email': email,
+            'full_name': full_name,
+            'cart_data': cart_data,
+            'total': total,
+        }
+        if existing:
+            AbandonedCart.objects.filter(token=token).update(**defaults)
+            message = "Cart updated"
+        else:
+            AbandonedCart.objects.create(token=token, **defaults)
+            message = "Cart saved"
+
+        return Response({"token": token, "message": message})
+
+
+class WishlistViewSet(viewsets.ModelViewSet):
+    serializer_class = WishlistItemSerializer
+    permission_classes = [permissions.AllowAny]
+    http_method_names = ['get', 'post', 'delete']
+
+    def get_queryset(self):
+        user = self.request.user
+        token = self.request.query_params.get('session_token', '')
+        if user.is_authenticated:
+            return WishlistItem.objects.filter(user=user)
+        if token:
+            return WishlistItem.objects.filter(session_token=token, user__isnull=True)
+        return WishlistItem.objects.none()
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        token = self.request.data.get('session_token', '')
+        if user.is_authenticated:
+            serializer.save(user=user)
+        else:
+            serializer.save(session_token=token)
+
+    @action(detail=False, methods=['post'])
+    def toggle(self, request):
+        product_id = request.data.get('product')
+        variant_id = request.data.get('variant')
+        token = request.data.get('session_token', '')
+        user = request.user if request.user.is_authenticated else None
+
+        if not product_id:
+            return Response({"error": "product is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Determine lookup filter
+        if user:
+            lookup = {'user': user, 'product_id': product_id, 'variant_id': variant_id}
+        elif token:
+            lookup = {'session_token': token, 'product_id': product_id, 'variant_id': variant_id, 'user__isnull': True}
+        else:
+            return Response({"error": "Authentication or session_token required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        existing = WishlistItem.objects.filter(**lookup).first()
+        if existing:
+            existing.delete()
+            return Response({"status": "removed"})
+        else:
+            item = WishlistItem.objects.create(
+                user=user,
+                session_token=token or '',
+                product_id=product_id,
+                variant_id=variant_id,
+            )
+            return Response(WishlistItemSerializer(item).data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=['patch'])
+    def notify(self, request, pk=None):
+        item = self.get_object()
+        item.notify_on_stock = request.data.get('notify_on_stock', True)
+        item.save(update_fields=['notify_on_stock'])
+        return Response(WishlistItemSerializer(item).data)

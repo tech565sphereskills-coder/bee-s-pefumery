@@ -43,3 +43,13 @@ api.interceptors.response.use(
 );
 
 export default api;
+
+export function getSessionToken(): string {
+  const key = "bees-session-token";
+  let token = localStorage.getItem(key);
+  if (!token) {
+    token = crypto.randomUUID();
+    localStorage.setItem(key, token);
+  }
+  return token;
+}

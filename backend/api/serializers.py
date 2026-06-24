@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Category, Product, Variant, Order, OrderItem, StoreSetting, ProductImage, Review, NewsletterSubscriber, Coupon, ContactMessage
+from .models import Category, Product, Variant, Order, OrderItem, StoreSetting, ProductImage, Review, NewsletterSubscriber, Coupon, ContactMessage, AbandonedCart, WishlistItem
 from django.contrib.auth.models import User
 
 class UserSerializer(serializers.ModelSerializer):
@@ -172,3 +172,47 @@ class ContactMessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ContactMessage
         fields = '__all__'
+
+class AbandonedCartSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AbandonedCart
+        fields = ['token', 'email', 'full_name', 'cart_data', 'total']
+        extra_kwargs = {'token': {'required': False}}
+
+
+class WishlistItemSerializer(serializers.ModelSerializer):
+    product_name = serializers.ReadOnlyField(source='product.name')
+    product_image = serializers.SerializerMethodField()
+    product_price = serializers.ReadOnlyField(source='product.price')
+    product_brand = serializers.ReadOnlyField(source='product.brand')
+    product_slug = serializers.ReadOnlyField(source='product.slug')
+    variant_name = serializers.SerializerMethodField()
+    in_stock = serializers.SerializerMethodField()
+
+    class Meta:
+        model = WishlistItem
+        fields = [
+            'id', 'product', 'product_name', 'product_image', 'product_price',
+            'product_brand', 'product_slug', 'variant', 'variant_name',
+            'notify_on_stock', 'in_stock', 'created_at',
+        ]
+        extra_kwargs = {
+            'session_token': {'write_only': True},
+            'user': {'read_only': True},
+        }
+
+    def get_product_image(self, obj):
+        try:
+            return obj.product.image.url
+        except Exception:
+            return None
+
+    def get_variant_name(self, obj):
+        if obj.variant:
+            return f"{obj.variant.size_ml}ml"
+        return ""
+
+    def get_in_stock(self, obj):
+        if obj.variant:
+            return obj.variant.stock > 0
+        return obj.product.stock > 0

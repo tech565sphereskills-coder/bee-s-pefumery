@@ -8,6 +8,16 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Slider } from "@/components/ui/slider";
 import { ProductCardSkeleton } from "@/components/ui/skeleton";
 
+interface Variant {
+  id: number;
+  size_ml: number;
+  price: string;
+  stock: number;
+  sku: string;
+  is_active: boolean;
+  sort_order: number;
+}
+
 interface Product {
   id: number;
   slug: string;
@@ -21,6 +31,7 @@ interface Product {
   is_active: boolean;
   category: number;
   category_name?: string;
+  variants?: Variant[];
 }
 
 const searchSchema = z.object({

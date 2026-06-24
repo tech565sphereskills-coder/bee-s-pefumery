@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Product, Variant, Order, OrderItem, StoreSetting
+from .models import Category, Product, Variant, Order, OrderItem, StoreSetting, AbandonedCart, WishlistItem
 
 class VariantInline(admin.TabularInline):
     model = Variant
@@ -35,3 +35,16 @@ class StoreSettingAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         # Only allow one instance of settings
         return not StoreSetting.objects.exists()
+
+@admin.register(AbandonedCart)
+class AbandonedCartAdmin(admin.ModelAdmin):
+    list_display = ('email', 'total', 'created_at', 'reminder_1h_sent', 'reminder_24h_sent', 'reminder_72h_sent', 'recovered')
+    list_filter = ('reminder_1h_sent', 'reminder_24h_sent', 'reminder_72h_sent', 'recovered', 'created_at')
+    search_fields = ('email', 'full_name', 'coupon_code')
+    readonly_fields = ('token', 'created_at', 'updated_at')
+
+@admin.register(WishlistItem)
+class WishlistItemAdmin(admin.ModelAdmin):
+    list_display = ('product', 'user', 'session_token', 'notify_on_stock', 'created_at')
+    list_filter = ('notify_on_stock', 'created_at')
+    search_fields = ('product__name', 'user__email', 'session_token')

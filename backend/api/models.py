@@ -159,3 +159,40 @@ class ContactMessage(models.Model):
 
     def __str__(self):
         return f"Inquiry from {self.full_name} - {self.subject}"
+
+class AbandonedCart(models.Model):
+    email = models.EmailField()
+    token = models.CharField(max_length=64, unique=True, help_text="Client-generated unique token")
+    cart_data = models.JSONField(default=list, help_text="Array of cart items")
+    total = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    full_name = models.CharField(max_length=200, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    reminder_1h_sent = models.BooleanField(default=False)
+    reminder_24h_sent = models.BooleanField(default=False)
+    reminder_72h_sent = models.BooleanField(default=False)
+    recovered = models.BooleanField(default=False)
+    coupon_code = models.CharField(max_length=50, blank=True, help_text="Recovery coupon attached")
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Abandoned cart for {self.email} ({self.created_at.date()})"
+
+
+class WishlistItem(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='wishlist_items')
+    session_token = models.CharField(max_length=64, blank=True, help_text="For guest users without an account")
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='wishlist_items')
+    variant = models.ForeignKey(Variant, on_delete=models.SET_NULL, null=True, blank=True)
+    notify_on_stock = models.BooleanField(default=False, help_text="Send email notification when back in stock")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        unique_together = [['user', 'product', 'variant'], ['session_token', 'product', 'variant']]
+
+    def __str__(self):
+        owner = self.user.email if self.user else self.session_token[:12]
+        return f"Wishlist item ({self.product.name}) — {owner}"

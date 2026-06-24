@@ -8,7 +8,8 @@ import {
 import { toast } from "sonner";
 import api from "@/lib/api";
 import { naira } from "@/data/products";
-import { useCart, useWishlist } from "@/store/cart";
+import { useCart } from "@/store/cart";
+import { useWishlist } from "@/store/wishlist";
 import { ProductCard } from "@/components/shop/product-card";
 import { ProductImage } from "@/components/shop/product-image";
 import { cn } from "@/lib/utils";
