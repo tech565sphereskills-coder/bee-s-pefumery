@@ -5,7 +5,8 @@
     "frontend": "cd frontend && npm run dev",
     "backend": "cd backend && python manage.py runserver",
     "dev": "npm-run-all --parallel frontend backend",
-    "postinstall": "npm install --prefix frontend"
+    "postinstall": "npm install --prefix frontend",
+    "build": "cd frontend && npm run build"
   },
   "devDependencies": {
     "npm-run-all": "^4.1.5"
