@@ -6,7 +6,7 @@
     "backend": "cd backend && python manage.py runserver",
     "dev": "npm-run-all --parallel frontend backend",
     "postinstall": "npm install --prefix frontend",
-    "build": "cd frontend && npm run build && cd .. && mkdir -p dist/client && cp -R frontend/dist/client/* dist/client/"
+    "build": "cd frontend && npm run build && cd .. && mkdir -p dist/client && cp -R frontend/dist/client/* dist/client/ && cp dist/client/_shell.html dist/client/index.html"
   },
   "devDependencies": {
     "npm-run-all": "^4.1.5"

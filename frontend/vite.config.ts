@@ -6,7 +6,16 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import path from "path";
 
 export default defineConfig({
-  plugins: [tanstackStart(), react(), tailwindcss(), tsconfigPaths()],
+  plugins: [
+    tanstackStart({
+      spa: {
+        enabled: true,
+      },
+    }),
+    react(),
+    tailwindcss(),
+    tsconfigPaths(),
+  ],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
