@@ -1,0 +1,385 @@
+[
+{
+  "model": "api.category",
+  "pk": 8,
+  "fields": {
+    "name": "Men's",
+    "slug": "Men-Perfume"
+  }
+},
+{
+  "model": "api.category",
+  "pk": 9,
+  "fields": {
+    "name": "Women's",
+    "slug": "Women-Fragrance"
+  }
+},
+{
+  "model": "api.category",
+  "pk": 10,
+  "fields": {
+    "name": "Children's",
+    "slug": "children-fragrance"
+  }
+},
+{
+  "model": "api.category",
+  "pk": 11,
+  "fields": {
+    "name": "Aromatherapy",
+    "slug": "Aromatherapy-fragrance"
+  }
+},
+{
+  "model": "api.category",
+  "pk": 12,
+  "fields": {
+    "name": "Sets",
+    "slug": "sets-fragrance"
+  }
+},
+{
+  "model": "api.category",
+  "pk": 13,
+  "fields": {
+    "name": "Solid Perfumes",
+    "slug": "Solid-Perfumes"
+  }
+},
+{
+  "model": "api.category",
+  "pk": 14,
+  "fields": {
+    "name": "Unisex",
+    "slug": "unisex-perf"
+  }
+},
+{
+  "model": "api.category",
+  "pk": 15,
+  "fields": {
+    "name": "Oil Perfumes",
+    "slug": "Oil-Perfumes"
+  }
+},
+{
+  "model": "api.product",
+  "pk": 4,
+  "fields": {
+    "name": "Amouage Purpose 50 Extrait de Parfum 100ml",
+    "brand": "Amouage",
+    "slug": "Amouage-Purpose",
+    "description": "Purpose 50 by Amouage is a Woody Spicy fragrance for women and men. This is a new fragrance. Purpose 50 was launched in 2025. The nose behind this fragrance is Quentin Bisch. Top notes are Frankincense, Pimento, Pink Pepper and Bergamot; middle notes are Papyrus, Sandalwood, Vetiver and Rose; base notes are Akigalawood, Suede, Vanilla, Saffron and Mystikal.",
+    "price": "1350000.00",
+    "discount_price": "1125800.00",
+    "category": 8,
+    "stock": 6,
+    "image": "products/1_1.jpg",
+    "is_active": true,
+    "best_seller": false,
+    "notes": {
+      "top": [],
+      "base": [
+        "Akigalawood"
+      ],
+      "heart": [
+        "Rose"
+      ]
+    },
+    "created_at": "2026-05-21T09:02:37.439Z",
+    "updated_at": "2026-05-21T09:20:35.722Z"
+  }
+},
+{
+  "model": "api.product",
+  "pk": 3,
+  "fields": {
+    "name": "Cotton Club AUD DE PERFUME",
+    "brand": "Cotton Club",
+    "slug": "cotton-club-aud-de-perfume",
+    "description": "This perfume is made of high quality materials. From reliving favourite memories to setting a mood, This perfume shares your passion for rich, tasteful and sophisticated fragrances. All rigorously screened, reviewed and tested, our catalog is a result of the drive for fresh inspiration in creating evocative, smokeless and drip less products. Exude confidence and charm like the world is yours for the taking in this Perfume.\r\nThis perfume is made of high quality materials. From reliving favourite memories to setting a mood, This perfume shares your passion for rich, tasteful and sophisticated fragrances. All rigorously screened, reviewed and tested, our catalog is a result of the drive for fresh inspiration in creating evocative, smokeless and drip less products. Exude confidence and charm like the world is yours for the taking in this Perfume.his perfume is made of high quality materials. From reliving favourite memories to setting a mood, This perfume shares your passion for rich, tasteful and sophisticated fragrances. All rigorously screened, reviewed and tested, our catalog is a result of the drive for fresh inspiration in creating evocative, smokeless and drip less products. Exude confidence and charm like the world is yours for the taking in this Perfume.",
+    "price": "24000.00",
+    "discount_price": "19998.00",
+    "category": 8,
+    "stock": 5,
+    "image": "products/1.jpg",
+    "is_active": true,
+    "best_seller": false,
+    "notes": {
+      "top": [
+        "Bergamot",
+        "White Ginger",
+        "Citrus"
+      ],
+      "base": [
+        "White Musk",
+        "Sandalwood",
+        "Golden Amber"
+      ],
+      "heart": [
+        "Cotton Flower",
+        "Iris",
+        "White Lily"
+      ]
+    },
+    "created_at": "2026-05-05T18:44:21.695Z",
+    "updated_at": "2026-05-21T09:12:26.764Z"
+  }
+},
+{
+  "model": "api.product",
+  "pk": 5,
+  "fields": {
+    "name": "Miral by Matin Martin EDP 100ml – Female – Lasts 48 Hours",
+    "brand": "Miral",
+    "slug": "Matin-Martin",
+    "description": "Miral is for women who love sweet, happy, and youthful scents. It brings confidence and charm wherever you go.",
+    "price": "3454797.00",
+    "discount_price": "-1.00",
+    "category": 9,
+    "stock": 2,
+    "image": "products/1_2.jpg",
+    "is_active": true,
+    "best_seller": false,
+    "notes": {
+      "top": [
+        "Sweet fruity florals with warm vanilla touches. Smells joyful",
+        "playful",
+        "and very attractive."
+      ],
+      "base": [
+        "warm vanilla"
+      ],
+      "heart": [
+        "vanilla"
+      ]
+    },
+    "created_at": "2026-05-21T09:34:02.578Z",
+    "updated_at": "2026-05-21T09:34:02.578Z"
+  }
+},
+{
+  "model": "api.product",
+  "pk": 6,
+  "fields": {
+    "name": "Amouage Opus VII Reckless Leather EDP 100ml",
+    "brand": "Amouage",
+    "slug": "Amouage-fragrance",
+    "description": "Built on a wild swirl of spices and rare resins, Opus VII is a reflection on how seductive knowledge is. Through an intensely green opening of sticky Galbanum and blindingly fresh Cardamom and Nutmeg blooms a \"reckless leather\".\r\n\r\nNutty Fenugreek, insanely smoky beams of Cypriol and the animalic call of Costus and Ambergris support the unabashed Leather centrepiece while a lather of fluttery Muscone, Sandalwood and Frankincense creates a harmonious and carnal ending. By eliciting a sense of peace after a vigorously green opening, Opus VII becomes a lesson on sapiosexuality and subtly teaches how seduction of the mind is more powerful than that of the eyes.",
+    "price": "950000.00",
+    "discount_price": "855800.00",
+    "category": 8,
+    "stock": 3,
+    "image": "products/1_3.jpg",
+    "is_active": true,
+    "best_seller": false,
+    "notes": {
+      "top": [
+        "Galbanum",
+        "Pink Pepper",
+        "Cardamom",
+        "Nutmeg",
+        "Fenugreek."
+      ],
+      "base": [
+        "Costus Root",
+        "Muscone",
+        "Sandalwood",
+        "Olibanum",
+        "Cypriol."
+      ],
+      "heart": [
+        "Agarwood Smoke",
+        "Patchouli",
+        "Ambrox",
+        "Leather",
+        "Ambergris."
+      ]
+    },
+    "created_at": "2026-05-21T17:13:10.260Z",
+    "updated_at": "2026-05-21T17:13:10.260Z"
+  }
+},
+{
+  "model": "api.product",
+  "pk": 7,
+  "fields": {
+    "name": "Christine Christian Dio Oud Ispahan Esprit de Parfum 80ml+ FREE SPRAY",
+    "brand": "Christine",
+    "slug": "Christine-fragrnace",
+    "description": "Announce your arrival without much effort with this sensational fragrance. It's a floral, woody fragrance infused in the exotic gourmand scents making every one that wears it stand out with its aroma still trailing after he/she had long left the scene. A very sensual and aromatic scent that every one who has taste for good perfumes will love. A combination of floral and woody accord form the top, middle and base notes.Announce your arrival without much effort with this sensational fragrance. It's a floral, woody fragrance infused in the exotic gourmand scents making every one that wears it stand out with its aroma still trailing after he/she had long left the scene. A very sensual and aromatic scent that every one who has taste for good perfumes will love. A combination of floral and woody accord form the top, middle and base notes.Announce your arrival without much effort with this sensational fragrance. It's a floral, woody fragrance infused in the exotic gourmand scents making every one that wears it stand out with its aroma still trailing after he/she hadlong left the scene. A very sensual and aromatic scent that every one who has taste for good perfumes will love. A combination of floral and woody accord form the top, middle and base notes..",
+    "price": "800000.00",
+    "discount_price": null,
+    "category": 9,
+    "stock": 1,
+    "image": "products/1_4.jpg",
+    "is_active": true,
+    "best_seller": false,
+    "notes": {
+      "top": [
+        "aromatic"
+      ],
+      "base": [
+        "A combination of floral and woody accord form the top",
+        "middle and base notes."
+      ],
+      "heart": [
+        "Rose"
+      ]
+    },
+    "created_at": "2026-05-22T19:39:16.557Z",
+    "updated_at": "2026-05-22T19:39:16.557Z"
+  }
+},
+{
+  "model": "api.product",
+  "pk": 8,
+  "fields": {
+    "name": "XERJOFF Richwood EDP 100ml Unisex Perfume",
+    "brand": "XERJOFF",
+    "slug": "XERJOFF-fragrance",
+    "description": "Richwood is a majestic patchouli-enhanced fragrance which, thanks to the happy and warm sandalwood from Mysore, displays a woody herb with a chocolaty and very inviting mood. With the ultimate cheerful warmth imparted by scrumptious citruses and cassis, it blooms and evokes the dark rose and patchouli.\r\nRichwood fragrance centers on sandalwood from Mysore one of the most beautiful, and rare materials in perfumery. Crowning the sandalwood's mellow warmth is a halo of crisp citrus.",
+    "price": "650000.00",
+    "discount_price": null,
+    "category": 9,
+    "stock": 2,
+    "image": "products/1_5.jpg",
+    "is_active": true,
+    "best_seller": false,
+    "notes": {
+      "top": [],
+      "base": [],
+      "heart": []
+    },
+    "created_at": "2026-05-23T19:24:44.751Z",
+    "updated_at": "2026-05-23T19:25:18.739Z"
+  }
+},
+{
+  "model": "api.product",
+  "pk": 9,
+  "fields": {
+    "name": "Initio Parfums Privés Oud for Greatness - 3.04 Fl Oz - Eau De Parfum Unisex - Main notes Natural Oud Wood, Agarwood Oil, Lavender, Saffron, Patchouli, Musk - 90ml",
+    "brand": "Initio Parfums",
+    "slug": "Initio-Parfums",
+    "description": "Oud for Greatness breathes out a force of nature, the wake of Greatness. The natural essence of Oud Wood has been perfected to this pitch, handled with majesty (and brutality) in this bold formula, scarcely highlighted by Patchouli and Musk. Superbly textured, strikingly natural, Oud has been handled by the creator in a register that is astonishingly fresh (Lavender) and spicy (Nutmeg, Saffron). An enchanting, thrilling perfume that makes all our dreams of greatness possible.",
+    "price": "600000.00",
+    "discount_price": "450000.00",
+    "category": 15,
+    "stock": 2,
+    "image": "products/1_6.jpg",
+    "is_active": true,
+    "best_seller": false,
+    "notes": {
+      "top": [
+        "Lavender"
+      ],
+      "base": [],
+      "heart": []
+    },
+    "created_at": "2026-05-27T18:05:51.284Z",
+    "updated_at": "2026-05-27T18:05:51.284Z"
+  }
+},
+{
+  "model": "api.product",
+  "pk": 10,
+  "fields": {
+    "name": "Million EDT Men Perfume 72 Hours Long Lasting parfum",
+    "brand": "1 Million",
+    "slug": "Million-EDT",
+    "description": "1 Million EDT Men Perfume 72 Hours Long Lasting perfume ( Directly From Manufacturers With Verifiable Barcodes and UPC )\r\nKeeps you smelling fresh \r\n\r\nKeeps you confident",
+    "price": "683909.00",
+    "discount_price": "800000.00",
+    "category": 8,
+    "stock": 3,
+    "image": "products/1_7.jpg",
+    "is_active": true,
+    "best_seller": false,
+    "notes": {
+      "top": [],
+      "base": [],
+      "heart": []
+    },
+    "created_at": "2026-06-17T09:41:27.637Z",
+    "updated_at": "2026-06-17T09:42:25.178Z"
+  }
+},
+{
+  "model": "api.product",
+  "pk": 11,
+  "fields": {
+    "name": "Initio Parfums Privés High Frequency EDP 90ml",
+    "brand": "Initio Parfums Privés",
+    "slug": "Initio-Parfumss",
+    "description": "Initio High Frequency EDP 90 ml is a luxury unisex scent that:\r\n\r\nOpens with creamy magnolia and sweet almond for a floral yet inviting start\r\n\r\nEvolves into jasmine and heliotrope with radiant hedione lift\r\n\r\nDries down to warm vanilla and sandalwood — cozy, seductive, and addictive Elegant and expressive — a fragrance that’s unforgettable yet wearable",
+    "price": "406800.00",
+    "discount_price": "520000.00",
+    "category": 14,
+    "stock": 2,
+    "image": "products/1_8.jpg",
+    "is_active": true,
+    "best_seller": false,
+    "notes": {
+      "top": [
+        "sweet almond"
+      ],
+      "base": [],
+      "heart": [
+        "magnolia"
+      ]
+    },
+    "created_at": "2026-06-17T09:54:13.932Z",
+    "updated_at": "2026-06-17T09:54:13.932Z"
+  }
+},
+{
+  "model": "api.product",
+  "pk": 12,
+  "fields": {
+    "name": "Maison Crivelli Oud MaracuJá Extrait de Parfum (100ml)",
+    "brand": "Maison Crivell",
+    "slug": "Maison-Crivelli",
+    "description": "Maison Crivelli Oud MaracuJá\r\n\r\nExtrait de Parfum\r\n\r\n \r\n\r\nBest Niche Fragrance 2024 - Fragrantica Awards\r\n\r\n– The defining adventure: a passion fruit tasting in remote oud wood forests.\r\n\r\n– The unexpected contrast: the richness of oud wood, contrasted by exotic and luminous passion fruit notes.\r\n\r\n\r\n \r\n\r\nFragrance family: exotic, woody and fruity.\r\nKey raw materials: passion fruit accord, saffron, rose absolute from Turkey ORPUR, oud accord, benzoin from Laos ORPUR, cistus absolute from Spain ORPUR, leather accord, patchouli oil from Indonesia ORPUR, vanilla, akigalawood. The ORPUR label brings together the finest natural perfume ingredients from the Givaudan perfume house.\r\nConcentration: 32%\r\n\r\n \r\n\r\nVegan creation\r\n\r\n\r\n\"Maracujá\" is the word for passion fruit in Portuguese.\r\n\r\n \r\n\r\nINGREDIENTS\r\n\r\nAlcohol Denat., Parfum, Aqua, Pogostemon Cablin Oil, Vanillin, Citronellol, Citrus Aurantium Bergamia Peel Oil, Ethylhexyl Salicylate, Limonene, Linalool, Butyl Methoxydibenzoylmethane, Linalyl Acetate, Pinene, Beta- Caryophyllene, Pelargonium Graveolens Flower Oil, Rose Flower Oil/Extract, Geraniol, Rose Ketones, Geranyl Acetate, Camphor, Citral, Alcohol, Terpineol, Terpinolene, Tris(Tetramethylhydroxypiperidinol) Citrate, Alpha-Terpinene, Benzyl Benzoate, Farnesol\r\nFlammable product: For external use only\r\n\r\n \r\n\r\nINSTRUCTIONS\r\n\r\nTo fully enjoy your olfactory experience and ensure safe use, here are a few tips.\r\nUSAGE PRECAUTIONS\r\n\r\nHold the bottle about 30 cm (12 inches) away from the skin for optimal and even diffusion.\r\nAvoid delicate or light-colored fabrics to prevent stains.\r\nDo not spray directly onto eyes, mucous membranes, or irritated skin.\r\nIf you have sensitive skin, perform a preliminary test by applying a small amount to the inside of your wrist before regular use.\r\nAPPLICATION AND DIFFUSION\r\n\r\nSpray the perfume on pulse points (wrists, behind the ears, base of the neck): the warmth of these areas intensifies the diffusion of the notes.\r\nAvoid rubbing your wrists together after application to preserve the purity of the olfactory accords.\r\nApply the perfume to clean, slightly moisturized skin for longer-lasting wear.\r\nSTORING YOUR PERFUME\r\n\r\nStore your bottle in a cool place, away from direct light, temperature variations, and humidity, to maintain the quality of your fragrance.\r\n \r\n \r\n\r\nThe olfactory experience\r\n\r\nGetaway: maracujá sun, crocodile heat, amber mangroves, fading light. Stop: a copper-colored hut, rambutan rose, vanilla darkness. A fiery, woody ritual! Oud passion.",
+    "price": "1334749.00",
+    "discount_price": "1987999.00",
+    "category": 14,
+    "stock": 3,
+    "image": "products/1_Kwr9OsK.jpg",
+    "is_active": true,
+    "best_seller": false,
+    "notes": {
+      "top": [],
+      "base": [],
+      "heart": []
+    },
+    "created_at": "2026-06-17T17:33:57.892Z",
+    "updated_at": "2026-06-17T17:33:57.892Z"
+  }
+},
+{
+  "model": "api.product",
+  "pk": 13,
+  "fields": {
+    "name": "Maison Crivelli Oud MaracuJá Extrait de Parfum (100ml)",
+    "brand": "Maison Crivelli",
+    "slug": "Maison-Crivellis",
+    "description": "Product details\r\nMaison Crivelli Oud MaracuJá\r\n\r\nExtrait de Parfum\r\n\r\n \r\n\r\nBest Niche Fragrance 2024 - Fragrantica Awards\r\n\r\n– The defining adventure: a passion fruit tasting in remote oud wood forests.\r\n\r\n– The unexpected contrast: the richness of oud wood, contrasted by exotic and luminous passion fruit notes.\r\n\r\n\r\n \r\n\r\nFragrance family: exotic, woody and fruity.\r\nKey raw materials: passion fruit accord, saffron, rose absolute from Turkey ORPUR, oud accord, benzoin from Laos ORPUR, cistus absolute from Spain ORPUR, leather accord, patchouli oil from Indonesia ORPUR, vanilla, akigalawood. The ORPUR label brings together the finest natural perfume ingredients from the Givaudan perfume house.\r\nConcentration: 32%\r\n\r\n \r\n\r\nVegan creation\r\n\r\n\r\n\"Maracujá\" is the word for passion fruit in Portuguese.\r\n\r\n \r\n\r\nINGREDIENTS\r\n\r\nAlcohol Denat., Parfum, Aqua, Pogostemon Cablin Oil, Vanillin, Citronellol, Citrus Aurantium Bergamia Peel Oil, Ethylhexyl Salicylate, Limonene, Linalool, Butyl Methoxydibenzoylmethane, Linalyl Acetate, Pinene, Beta- Caryophyllene, Pelargonium Graveolens Flower Oil, Rose Flower Oil/Extract, Geraniol, Rose Ketones, Geranyl Acetate, Camphor, Citral, Alcohol, Terpineol, Terpinolene, Tris(Tetramethylhydroxypiperidinol) Citrate, Alpha-Terpinene, Benzyl Benzoate, Farnesol\r\nFlammable product: For external use only\r\n\r\n \r\n\r\nINSTRUCTIONS\r\n\r\nTo fully enjoy your olfactory experience and ensure safe use, here are a few tips.\r\nUSAGE PRECAUTIONS\r\n\r\nHold the bottle about 30 cm (12 inches) away from the skin for optimal and even diffusion.\r\nAvoid delicate or light-colored fabrics to prevent stains.\r\nDo not spray directly onto eyes, mucous membranes, or irritated skin.\r\nIf you have sensitive skin, perform a preliminary test by applying a small amount to the inside of your wrist before regular use.\r\nAPPLICATION AND DIFFUSION\r\n\r\nSpray the perfume on pulse points (wrists, behind the ears, base of the neck): the warmth of these areas intensifies the diffusion of the notes.\r\nAvoid rubbing your wrists together after application to preserve the purity of the olfactory accords.\r\nApply the perfume to clean, slightly moisturized skin for longer-lasting wear.\r\nSTORING YOUR PERFUME\r\n\r\nStore your bottle in a cool place, away from direct light, temperature variations, and humidity, to maintain the quality of your fragrance.\r\n \r\n \r\n\r\nThe olfactory experience\r\n\r\nGetaway: maracujá sun, crocodile heat, amber mangroves, fading light. Stop: a copper-colored hut, rambutan rose, vanilla darkness. A fiery, woody ritual! Oud passion.",
+    "price": "99998.00",
+    "discount_price": "10000.00",
+    "category": 11,
+    "stock": 0,
+    "image": "products/1_2rE0gpz.jpg",
+    "is_active": true,
+    "best_seller": false,
+    "notes": {
+      "top": [],
+      "base": [],
+      "heart": []
+    },
+    "created_at": "2026-06-17T17:40:07.272Z",
+    "updated_at": "2026-06-17T17:40:07.272Z"
+  }
+}
+]
